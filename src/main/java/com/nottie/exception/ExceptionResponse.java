@@ -1,4 +1,4 @@
-package com.nottie.exceptions;
+package com.nottie.exception;
 
 import java.util.Date;
 

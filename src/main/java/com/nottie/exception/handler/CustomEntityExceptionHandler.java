@@ -1,6 +1,6 @@
-package com.nottie.exceptions.handler;
+package com.nottie.exception.handler;
 
-import com.nottie.exceptions.ExceptionResponse;
+import com.nottie.exception.ExceptionResponse;
 import org.springframework.http.HttpStatus;
 import org.springframework.http.ResponseEntity;
 import org.springframework.web.bind.annotation.ControllerAdvice;
