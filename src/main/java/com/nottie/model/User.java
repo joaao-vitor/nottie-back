@@ -24,8 +24,8 @@ public class User {
     @Column(nullable = false)
     private String name;
 
-    @ColumnDefault("")
-    private String profileImg;
+    @Column(name = "profile_img")
+    private String profileImg = "\"https://cdn.pixabay.com/photo/2015/10/05/22/37/blank-profile-picture-973460_640.png\"";
 
     public User() {
     }
@@ -97,5 +97,17 @@ public class User {
     @Override
     public int hashCode() {
         return Objects.hash(id, email, username, password, name, profileImg);
+    }
+
+    @Override
+    public String toString() {
+        return "User{" +
+                "id=" + id +
+                ", email='" + email + '\'' +
+                ", username='" + username + '\'' +
+                ", password='" + password + '\'' +
+                ", name='" + name + '\'' +
+                ", profileImg='" + profileImg + '\'' +
+                '}';
     }
 }
