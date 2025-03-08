@@ -1,7 +1,9 @@
 package com.nottie.controller;
 
 import com.nottie.dto.request.auth.CreateUserDTO;
+import com.nottie.dto.request.auth.LoginDTO;
 import com.nottie.dto.response.auth.CreatedUserDTO;
+import com.nottie.dto.response.auth.LoggedDTO;
 import com.nottie.service.AuthService;
 import com.nottie.util.ResponseUtil;
 import org.springframework.http.HttpStatus;
@@ -25,5 +27,11 @@ public class AuthController {
     public ResponseEntity<?> registerUser(@RequestBody CreateUserDTO createUserDTO){
         CreatedUserDTO createdUserDTO = authService.createUser(createUserDTO);
         return ResponseUtil.buildSuccessResponse(createdUserDTO, "User created successfully", HttpStatus.CREATED);
+    }
+
+    @PostMapping("/sign-in")
+    public ResponseEntity<?> loginUser(@RequestBody LoginDTO loginDTO){
+        LoggedDTO loggedDTO = authService.authenticate(loginDTO);
+        return ResponseUtil.buildSuccessResponse(loggedDTO, "User logged successfully", HttpStatus.OK);
     }
 }
