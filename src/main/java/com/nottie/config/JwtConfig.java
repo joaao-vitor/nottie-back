@@ -12,8 +12,10 @@ public class JwtConfig {
     private RSAPublicKey publicKey;
     @Value("${security.jwt.private.key}")
     private RSAPrivateKey privateKey;
-    @Value("${security.jwt.expiration-time}")
-    private long expirationTime;
+    @Value("${security.jwt.access.expiration-time}")
+    private long accessExpirationTime;
+    @Value("${security.jwt.refresh.expiration-time}")
+    private long refreshExpirationTime;
 
     public RSAPublicKey getPublicKey() {
         return publicKey;
@@ -23,8 +25,11 @@ public class JwtConfig {
         return privateKey;
     }
 
-    public long getExpirationTime() {
-        return expirationTime;
+    public long getAccessExpirationTime() {
+        return accessExpirationTime;
     }
 
+    public long getRefreshExpirationTime() {
+        return refreshExpirationTime;
+    }
 }

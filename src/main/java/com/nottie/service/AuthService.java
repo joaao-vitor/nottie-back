@@ -2,9 +2,12 @@ package com.nottie.service;
 
 import com.nottie.dto.request.auth.CreateUserDTO;
 import com.nottie.dto.request.auth.LoginDTO;
+import com.nottie.dto.request.auth.RefreshTokenRequestDTO;
 import com.nottie.dto.response.auth.CreatedUserDTO;
 import com.nottie.dto.response.auth.LoggedDTO;
+import com.nottie.dto.response.auth.RefreshTokenResponseDTO;
 import com.nottie.dto.response.auth.UserLoggedDTO;
+import com.nottie.exception.BadCredentialsException;
 import com.nottie.exception.BadRequestException;
 import com.nottie.mapper.UserMapper;
 import com.nottie.model.User;
@@ -66,10 +69,29 @@ public class AuthService {
                 new UsernamePasswordAuthenticationToken(loginDTO.email(), loginDTO.password())
         );
         User user = ((UserDetail) authentication.getPrincipal()).getUser();
-        String token = jwtService.generateToken(authentication);
+        String accessToken = jwtService.generateAccessToken(authentication);
+        String refreshToken = jwtService.generateRefreshToken(authentication);
 
         UserLoggedDTO userLoggedDTO = UserMapper.INSTANCE.userToUserLoggedDTO(user);
 
-        return new LoggedDTO(token, userLoggedDTO);
+        return new LoggedDTO(accessToken, refreshToken, userLoggedDTO);
+    }
+
+    public RefreshTokenResponseDTO refreshToken(RefreshTokenRequestDTO refreshTokenRequestDTO) {
+        if(!jwtService.validateToken(refreshTokenRequestDTO.refreshToken()))
+            throw new BadCredentialsException("Invalid refresh token");
+
+        String email = jwtService.extractEmailFromToken(refreshTokenRequestDTO.refreshToken());
+        UserDetail userDetail = userDetailRepository.findByEmail(email).orElse(null);
+        if(userDetail == null || !userDetail.isEnabled() || userDetail.getUser() == null)
+            throw new BadCredentialsException("Invalid refresh token");
+
+
+
+        var authentication = new UsernamePasswordAuthenticationToken(userDetail, null, userDetail.getAuthorities());
+
+        String newAccessToken = jwtService.generateAccessToken(authentication);
+
+        return new RefreshTokenResponseDTO(newAccessToken);
     }
 }

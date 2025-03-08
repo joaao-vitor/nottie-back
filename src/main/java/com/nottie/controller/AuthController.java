@@ -2,16 +2,15 @@ package com.nottie.controller;
 
 import com.nottie.dto.request.auth.CreateUserDTO;
 import com.nottie.dto.request.auth.LoginDTO;
+import com.nottie.dto.request.auth.RefreshTokenRequestDTO;
 import com.nottie.dto.response.auth.CreatedUserDTO;
 import com.nottie.dto.response.auth.LoggedDTO;
+import com.nottie.dto.response.auth.RefreshTokenResponseDTO;
 import com.nottie.service.AuthService;
 import com.nottie.util.ResponseUtil;
 import org.springframework.http.HttpStatus;
 import org.springframework.http.ResponseEntity;
-import org.springframework.web.bind.annotation.PostMapping;
-import org.springframework.web.bind.annotation.RequestBody;
-import org.springframework.web.bind.annotation.RequestMapping;
-import org.springframework.web.bind.annotation.RestController;
+import org.springframework.web.bind.annotation.*;
 
 @RestController
 @RequestMapping("/auth")
@@ -33,5 +32,11 @@ public class AuthController {
     public ResponseEntity<?> loginUser(@RequestBody LoginDTO loginDTO){
         LoggedDTO loggedDTO = authService.authenticate(loginDTO);
         return ResponseUtil.buildSuccessResponse(loggedDTO, "User logged successfully", HttpStatus.OK);
+    }
+
+    @PutMapping("/refresh")
+    public ResponseEntity<?> refreshToken(@RequestBody RefreshTokenRequestDTO refreshTokenRequestDTO){
+        RefreshTokenResponseDTO token = authService.refreshToken(refreshTokenRequestDTO);
+        return ResponseUtil.buildSuccessResponse(token, "Refresh token successfully", HttpStatus.OK);
     }
 }

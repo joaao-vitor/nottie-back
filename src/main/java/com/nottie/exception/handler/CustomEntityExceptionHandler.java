@@ -1,5 +1,6 @@
 package com.nottie.exception.handler;
 
+import com.nottie.exception.BadCredentialsException;
 import com.nottie.exception.BadRequestException;
 import com.nottie.exception.ExceptionResponse;
 import com.nottie.exception.NotFoundException;
@@ -34,5 +35,11 @@ public class CustomEntityExceptionHandler extends ResponseEntityExceptionHandler
     public final ResponseEntity<ExceptionResponse> handleNotFoundExceptions(Exception ex, WebRequest request) {
         ExceptionResponse exceptionResponse = new ExceptionResponse(ex.getMessage(), new Date(), request.getDescription(false));
         return new ResponseEntity<>(exceptionResponse, HttpStatus.NOT_FOUND);
+    }
+
+    @ExceptionHandler({BadCredentialsException.class})
+    public final ResponseEntity<ExceptionResponse> handleForbiddenExceptions(Exception ex, WebRequest request) {
+        ExceptionResponse exceptionResponse = new ExceptionResponse(ex.getMessage(), new Date(), request.getDescription(false));
+        return new ResponseEntity<>(exceptionResponse, HttpStatus.FORBIDDEN);
     }
 }
