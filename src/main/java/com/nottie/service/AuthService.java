@@ -44,10 +44,10 @@ public class AuthService {
         if (!createUserDTO.password().equals(createUserDTO.confirmPassword()))
             throw new BadRequestException("Passwords don't match");
 
-        if(userRepository.findByEmail(createUserDTO.email()).isPresent())
+        if(userRepository.findByEmailIgnoreCase(createUserDTO.email()).isPresent())
             throw new BadRequestException("Email already exists");
 
-        if(userRepository.findByUsername(createUserDTO.username()).isPresent())
+        if(userRepository.findByUsernameIgnoreCase(createUserDTO.username()).isPresent())
             throw new BadRequestException("Username already exists");
 
         User user = UserMapper.INSTANCE.createUserDTOToUser(createUserDTO);
