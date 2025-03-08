@@ -1,9 +1,6 @@
 package com.nottie.exception.handler;
 
-import com.nottie.exception.BadCredentialsException;
-import com.nottie.exception.BadRequestException;
-import com.nottie.exception.ExceptionResponse;
-import com.nottie.exception.NotFoundException;
+import com.nottie.exception.*;
 import org.springframework.http.HttpStatus;
 import org.springframework.http.ResponseEntity;
 import org.springframework.web.bind.annotation.ControllerAdvice;
@@ -42,4 +39,12 @@ public class CustomEntityExceptionHandler extends ResponseEntityExceptionHandler
         ExceptionResponse exceptionResponse = new ExceptionResponse(ex.getMessage(), new Date(), request.getDescription(false));
         return new ResponseEntity<>(exceptionResponse, HttpStatus.FORBIDDEN);
     }
+
+    @ExceptionHandler({UnauthorizedException.class})
+    public final ResponseEntity<ExceptionResponse> handleUnauthorizedExceptions(Exception ex, WebRequest request) {
+        ExceptionResponse exceptionResponse = new ExceptionResponse(ex.getMessage(), new Date(), request.getDescription(false));
+        return new ResponseEntity<>(exceptionResponse, HttpStatus.UNAUTHORIZED);
+    }
+
+
 }
