@@ -1,5 +1,6 @@
 package com.nottie.controller;
 
+import com.nottie.dto.request.user.UserSummaryDTO;
 import com.nottie.service.UserService;
 import com.nottie.util.ResponseUtil;
 import org.springframework.http.HttpStatus;
@@ -28,4 +29,9 @@ public class UserController {
         return ResponseUtil.buildSuccessResponse(null, "User unfollowed successfully", HttpStatus.OK);
     }
 
+    @GetMapping("/summary/{id}")
+    public ResponseEntity<?> getUserSummary(@PathVariable Long id) {
+        UserSummaryDTO user = userService.getUserSummary(id);
+        return ResponseUtil.buildSuccessResponse(user, "User summary fetched successfully", HttpStatus.OK);
+    }
 }

@@ -1,6 +1,8 @@
 package com.nottie.service;
 
+import com.nottie.dto.request.user.UserSummaryDTO;
 import com.nottie.exception.BadRequestException;
+import com.nottie.mapper.UserMapper;
 import com.nottie.model.User;
 import com.nottie.repository.UserRepository;
 import com.nottie.util.AuthUtil;
@@ -55,4 +57,19 @@ public class UserService {
         userRepository.save(userAuthenticated);
     }
 
+    public UserSummaryDTO getUserSummary(Long id) {
+        User user = userRepository.getUserById(id).orElseThrow(
+                () -> new BadRequestException("User not found")
+        );
+
+        UserSummaryDTO userSummaryDTO = UserMapper.INSTANCE.userToUserSummaryDTO(user);
+
+        Long followersCount = userRepository.countFollowersByUserId(user.getId()).orElseThrow();
+        userSummaryDTO.setFollowersCount(followersCount);
+
+        Long followingCount = userRepository.countFollwingByUserId(user.getId()).orElseThrow();
+        userSummaryDTO.setFollowingCount(followingCount);
+
+        return userSummaryDTO;
+    }
 }
