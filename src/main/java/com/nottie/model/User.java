@@ -1,9 +1,9 @@
 package com.nottie.model;
 
+import com.fasterxml.jackson.annotation.JsonIgnore;
+import com.fasterxml.jackson.annotation.JsonIgnoreProperties;
 import jakarta.persistence.*;
-import org.hibernate.annotations.ColumnDefault;
-
-import java.util.Objects;
+import java.util.List;
 
 @Entity
 @Table(name = "users")
@@ -12,12 +12,14 @@ public class User {
     @GeneratedValue(strategy = GenerationType.IDENTITY)
     private Long id;
 
+    @JsonIgnore
     @Column(nullable = false, unique = true)
     private String email;
 
     @Column(nullable = false, unique = true)
     private String username;
 
+    @JsonIgnore
     @Column(nullable = false)
     private String password;
 
@@ -27,15 +29,30 @@ public class User {
     @Column(name = "profile_img")
     private String profileImg = "\"https://cdn.pixabay.com/photo/2015/10/05/22/37/blank-profile-picture-973460_640.png\"";
 
+    @ManyToMany
+    @JoinTable(
+            name = "user_follow",
+            joinColumns = {@JoinColumn(name = "user_id")},
+            inverseJoinColumns = {@JoinColumn(name = "user_followed_id")}
+    )
+    @JsonIgnoreProperties({"following", "followers"})
+    private List<User> following;
+
+    @ManyToMany(mappedBy = "following")
+    @JsonIgnoreProperties({"following", "followers"})
+    private List<User> followers;
+
     public User() {
     }
 
-    public User(String email, String username, String password, String name, String profileImg) {
+    public User(String email, String username, String password, String name, String profileImg, List<User> following, List<User> followers) {
         this.email = email;
         this.username = username;
         this.password = password;
         this.name = name;
         this.profileImg = profileImg;
+        this.following = following;
+        this.followers = followers;
     }
 
     public String getProfileImg() {
@@ -86,28 +103,21 @@ public class User {
         this.id = id;
     }
 
-    @Override
-    public boolean equals(Object o) {
-        if (this == o) return true;
-        if (o == null || getClass() != o.getClass()) return false;
-        User user = (User) o;
-        return Objects.equals(id, user.id) && Objects.equals(email, user.email) && Objects.equals(username, user.username) && Objects.equals(password, user.password) && Objects.equals(name, user.name) && Objects.equals(profileImg, user.profileImg);
+    public List<User> getFollowing() {
+        return following;
     }
 
-    @Override
-    public int hashCode() {
-        return Objects.hash(id, email, username, password, name, profileImg);
+    public void setFollowing(List<User> following) {
+        this.following = following;
     }
 
-    @Override
-    public String toString() {
-        return "User{" +
-                "id=" + id +
-                ", email='" + email + '\'' +
-                ", username='" + username + '\'' +
-                ", password='" + password + '\'' +
-                ", name='" + name + '\'' +
-                ", profileImg='" + profileImg + '\'' +
-                '}';
+    public List<User> getFollowers() {
+        return followers;
     }
+
+    public void setFollowers(List<User> followers) {
+        this.followers = followers;
+    }
+
+
 }
