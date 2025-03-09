@@ -12,11 +12,13 @@ import com.nottie.exception.BadRequestException;
 import com.nottie.mapper.UserMapper;
 import com.nottie.model.User;
 import com.nottie.model.UserDetail;
+import com.nottie.model.VerificationToken;
 import com.nottie.repository.UserDetailRepository;
 import com.nottie.repository.UserRepository;
 import jakarta.transaction.Transactional;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
+import org.springframework.beans.factory.annotation.Value;
 import org.springframework.security.authentication.AuthenticationManager;
 import org.springframework.security.authentication.UsernamePasswordAuthenticationToken;
 import org.springframework.security.crypto.password.PasswordEncoder;
@@ -24,22 +26,26 @@ import org.springframework.stereotype.Service;
 
 @Service
 public class AuthService {
-
+    @Value("${application.website.verification-link}")
+    private String verificationLink;
 
     private final UserDetailRepository userDetailRepository;
     private final UserRepository userRepository;
     private final AuthenticationManager authenticationManager;
     private final JwtService jwtService;
     private final PasswordEncoder passwordEncoder;
-
     private final Logger logger = LoggerFactory.getLogger(AuthService.class);
+    private final VerificationTokenService verificationTokenService;
+    private final EmailService emailService;
 
-    public AuthService(UserRepository userRepository, AuthenticationManager authenticationManager, JwtService jwtService, PasswordEncoder passwordEncoder, UserDetailRepository userDetailRepository) {
+    public AuthService(UserRepository userRepository, AuthenticationManager authenticationManager, JwtService jwtService, PasswordEncoder passwordEncoder, UserDetailRepository userDetailRepository, VerificationTokenService verificationTokenService, EmailService emailService) {
         this.userRepository = userRepository;
         this.authenticationManager = authenticationManager;
         this.jwtService = jwtService;
         this.passwordEncoder = passwordEncoder;
         this.userDetailRepository = userDetailRepository;
+        this.verificationTokenService = verificationTokenService;
+        this.emailService = emailService;
     }
 
     @Transactional
@@ -59,7 +65,11 @@ public class AuthService {
         user.setPassword(passwordEncoder.encode(user.getPassword()));
         userRepository.save(user);
 
-        UserDetail userDetail = new UserDetail(user, true);
+        VerificationToken verificationToken = verificationTokenService.createVerificationToken(user);
+
+        sendVerificationEmail(user.getEmail(), verificationToken.getToken());
+
+        UserDetail userDetail = new UserDetail(user, false);
         userDetailRepository.save(userDetail);
 
         return UserMapper.INSTANCE.userToCreatedUserDTO(user);
@@ -89,11 +99,20 @@ public class AuthService {
             throw new BadCredentialsException("Invalid refresh token");
 
 
-
         var authentication = new UsernamePasswordAuthenticationToken(userDetail, null, userDetail.getAuthorities());
 
         String newAccessToken = jwtService.generateAccessToken(authentication);
 
         return new RefreshTokenResponseDTO(newAccessToken);
+    }
+
+    private void sendVerificationEmail(String email, String token) {
+        String link = "<a href=\"" + verificationLink + "?token="+ token + "\">" + "Click here" + "</a>";
+
+        emailService.sendSimpleMail(email, "Welcome to Nottie!",
+                "<h1>Welcome to Nottie!</h1>" +
+                        "<h4>Verify your email address</h4>" +
+                        "<h4>Click on the link bellow</h4>" +
+                        link);
     }
 }
