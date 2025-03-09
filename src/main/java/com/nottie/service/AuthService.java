@@ -14,6 +14,7 @@ import com.nottie.model.User;
 import com.nottie.model.UserDetail;
 import com.nottie.repository.UserDetailRepository;
 import com.nottie.repository.UserRepository;
+import jakarta.transaction.Transactional;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 import org.springframework.security.authentication.AuthenticationManager;
@@ -41,6 +42,7 @@ public class AuthService {
         this.userDetailRepository = userDetailRepository;
     }
 
+    @Transactional
     public CreatedUserDTO createUser(CreateUserDTO createUserDTO) {
         logger.info("Creating user {}", createUserDTO.username());
 
