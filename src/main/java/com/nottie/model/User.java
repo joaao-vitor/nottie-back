@@ -1,7 +1,6 @@
 package com.nottie.model;
 
 import com.fasterxml.jackson.annotation.JsonIgnore;
-import com.fasterxml.jackson.annotation.JsonIgnoreProperties;
 import jakarta.persistence.*;
 import java.util.List;
 
@@ -31,68 +30,45 @@ public class User {
 
     @ManyToMany
     @JoinTable(
-            name = "user_follow",
+            name = "user_follow_user",
             joinColumns = {@JoinColumn(name = "user_id")},
             inverseJoinColumns = {@JoinColumn(name = "user_followed_id")}
     )
-    @JsonIgnoreProperties({"following", "followers"})
-    private List<User> following;
+    @JsonIgnore
+    private List<User> followingUsers;
 
-    @ManyToMany(mappedBy = "following")
-    @JsonIgnoreProperties({"following", "followers"})
-    private List<User> followers;
+    @ManyToMany(mappedBy = "followingUsers")
+    private List<User> followersUsers;
 
-    public User() {
+    @ManyToMany
+    @JoinTable(
+            name = "user_follow_workstation",
+            joinColumns = {@JoinColumn(name = "user_id")},
+            inverseJoinColumns = {@JoinColumn(name = "workstation_id")}
+    )
+    private List<Workstation> followingWorkstations;
+
+    @ManyToMany(mappedBy = "followingUsers")
+    private List<Workstation> followersWorkstations;
+
+
+
+    public User() {}
+
+    public List<Workstation> getFollowingWorkstations() {
+        return followingWorkstations;
     }
 
-    public User(String email, String username, String password, String name, String profileImg, List<User> following, List<User> followers) {
-        this.email = email;
-        this.username = username;
-        this.password = password;
-        this.name = name;
-        this.profileImg = profileImg;
-        this.following = following;
-        this.followers = followers;
+    public void setFollowingWorkstations(List<Workstation> followingWorkstations) {
+        this.followingWorkstations = followingWorkstations;
     }
 
-    public String getProfileImg() {
-        return profileImg;
+    public List<Workstation> getFollowersWorkstations() {
+        return followersWorkstations;
     }
 
-    public void setProfileImg(String profileImg) {
-        this.profileImg = profileImg;
-    }
-
-    public String getName() {
-        return name;
-    }
-
-    public void setName(String name) {
-        this.name = name;
-    }
-
-    public String getPassword() {
-        return password;
-    }
-
-    public void setPassword(String password) {
-        this.password = password;
-    }
-
-    public String getUsername() {
-        return username;
-    }
-
-    public void setUsername(String username) {
-        this.username = username;
-    }
-
-    public String getEmail() {
-        return email;
-    }
-
-    public void setEmail(String email) {
-        this.email = email;
+    public void setFollowersWorkstations(List<Workstation> followersWorkstations) {
+        this.followersWorkstations = followersWorkstations;
     }
 
     public Long getId() {
@@ -103,21 +79,59 @@ public class User {
         this.id = id;
     }
 
-    public List<User> getFollowing() {
-        return following;
+    public String getEmail() {
+        return email;
     }
 
-    public void setFollowing(List<User> following) {
-        this.following = following;
+    public void setEmail(String email) {
+        this.email = email;
     }
 
-    public List<User> getFollowers() {
-        return followers;
+    public String getUsername() {
+        return username;
     }
 
-    public void setFollowers(List<User> followers) {
-        this.followers = followers;
+    public void setUsername(String username) {
+        this.username = username;
     }
 
+    public String getPassword() {
+        return password;
+    }
 
+    public void setPassword(String password) {
+        this.password = password;
+    }
+
+    public String getName() {
+        return name;
+    }
+
+    public void setName(String name) {
+        this.name = name;
+    }
+
+    public String getProfileImg() {
+        return profileImg;
+    }
+
+    public void setProfileImg(String profileImg) {
+        this.profileImg = profileImg;
+    }
+
+    public List<User> getFollowingUsers() {
+        return followingUsers;
+    }
+
+    public void setFollowingUsers(List<User> followingUsers) {
+        this.followingUsers = followingUsers;
+    }
+
+    public List<User> getFollowersUsers() {
+        return followersUsers;
+    }
+
+    public void setFollowersUsers(List<User> followersUsers) {
+        this.followersUsers = followersUsers;
+    }
 }

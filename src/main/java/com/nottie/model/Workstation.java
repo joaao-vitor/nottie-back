@@ -33,6 +33,10 @@ public class Workstation {
     )
     @JsonIgnore
     private Set<User> followingUsers;
+
+    @ManyToMany(mappedBy = "followingWorkstations")
+    private Set<User> followersUsers;
+
     @ManyToMany
     @JoinTable(
             name = "workstation_follows_workstation",
@@ -41,6 +45,9 @@ public class Workstation {
     )
     @JsonIgnore
     private Set<Workstation> followingWorkstations;
+
+    @ManyToMany(mappedBy = "followingWorkstations")
+    private Set<Workstation> followersWorkstations;
 
     @ManyToMany
     @JoinTable(
@@ -72,6 +79,22 @@ public class Workstation {
     public Workstation() {
         leaders = new HashSet<>();
         members = new HashSet<>();
+    }
+
+    public Set<User> getFollowersUsers() {
+        return followersUsers;
+    }
+
+    public void setFollowersUsers(Set<User> followersUsers) {
+        this.followersUsers = followersUsers;
+    }
+
+    public Set<Workstation> getFollowersWorkstations() {
+        return followersWorkstations;
+    }
+
+    public void setFollowersWorkstations(Set<Workstation> followersWorkstations) {
+        this.followersWorkstations = followersWorkstations;
     }
 
     public Long getId() {

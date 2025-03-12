@@ -17,16 +17,28 @@ public class UserController {
         this.userService = userService;
     }
 
-    @PatchMapping("/follow/{id}")
+    @PatchMapping("/follow/user/{id}")
     public ResponseEntity<?> followUser(@PathVariable Long id) {
-        userService.followUser(id);
+        userService.follow(id, UserService.FollowType.USER);
         return ResponseUtil.buildSuccessResponse(null, "User followed successfully", HttpStatus.OK);
     }
 
-    @PatchMapping("/unfollow/{id}")
+    @PatchMapping("/unfollow/user/{id}")
     public ResponseEntity<?> unfollowUser(@PathVariable Long id) {
-        userService.unfollowUser(id);
+        userService.follow(id, UserService.FollowType.USER);
         return ResponseUtil.buildSuccessResponse(null, "User unfollowed successfully", HttpStatus.OK);
+    }
+
+    @PatchMapping("/follow/workstation/{id}")
+    public ResponseEntity<?> followWorkstation(@PathVariable Long id) {
+        userService.follow(id, UserService.FollowType.WORKSTATION);
+        return ResponseUtil.buildSuccessResponse(null, "Workstation followed successfully", HttpStatus.OK);
+    }
+
+    @PatchMapping("/unfollow/workstation/{id}")
+    public ResponseEntity<?> unfollowWorkstation(@PathVariable Long id) {
+        userService.unfollow(id, UserService.FollowType.WORKSTATION);
+        return ResponseUtil.buildSuccessResponse(null, "Workstation unfollowed successfully", HttpStatus.OK);
     }
 
     @GetMapping("/summary/{id}")

@@ -8,4 +8,7 @@ import java.util.Optional;
 public interface WorkstationRepository extends JpaRepository<Workstation, Long> {
 
     Optional<Workstation> getWorkstationsByUsername(String username);
+
+    Optional<Workstation> getWorkstationsById(Long id);
+
 }
