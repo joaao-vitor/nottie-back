@@ -30,7 +30,7 @@ public class WorkstationController {
     public ResponseEntity<?> followUser(@PathVariable Long workstationId, @PathVariable Long userId) {
         workstationService.follow(workstationId, userId, WorkstationService.FollowType.USER);
 
-        return ResponseUtil.buildSuccessResponse(null, "User followed successfully", HttpStatus.OK);
+        return ResponseUtil.buildSuccessResponse("User followed successfully", HttpStatus.OK);
     }
 
     @PostMapping("/follow/workstation/{workstationId}/{followId}")
@@ -38,7 +38,7 @@ public class WorkstationController {
     public ResponseEntity<?> followWorkstation(@PathVariable Long workstationId, @PathVariable Long followId) {
         workstationService.follow(workstationId, followId, WorkstationService.FollowType.WORKSTATION);
 
-        return ResponseUtil.buildSuccessResponse(null, "Workstation followed successfully", HttpStatus.OK);
+        return ResponseUtil.buildSuccessResponse("Workstation followed successfully", HttpStatus.OK);
     }
 
     @DeleteMapping("/unfollow/user/{workstationId}/{userId}")
@@ -46,7 +46,7 @@ public class WorkstationController {
     public ResponseEntity<?> unfollowUser(@PathVariable Long workstationId, @PathVariable Long userId) {
         workstationService.unfollow(workstationId, userId, WorkstationService.FollowType.USER);
 
-        return ResponseUtil.buildSuccessResponse(null, "User unfollowed successfully", HttpStatus.OK);
+        return ResponseUtil.buildSuccessResponse("User unfollowed successfully", HttpStatus.OK);
     }
 
     @DeleteMapping("/unfollow/workstation/{workstationId}/{followId}")
@@ -54,6 +54,6 @@ public class WorkstationController {
     public ResponseEntity<?> unfollowWorkstation(@PathVariable Long workstationId, @PathVariable Long followId) {
         workstationService.unfollow(workstationId, followId, WorkstationService.FollowType.WORKSTATION);
 
-        return ResponseUtil.buildSuccessResponse(null, "Workstation unfollowed successfully", HttpStatus.OK);
+        return ResponseUtil.buildSuccessResponse("Workstation unfollowed successfully", HttpStatus.OK);
     }
 }

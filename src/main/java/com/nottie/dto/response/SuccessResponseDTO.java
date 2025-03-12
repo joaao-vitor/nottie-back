@@ -1,12 +1,13 @@
 package com.nottie.dto.response;
 
+import java.time.Instant;
 import java.time.LocalDateTime;
 import java.util.Objects;
 
 public class SuccessResponseDTO <T>{
     private String message;
     private T data;
-    private LocalDateTime timestamp;
+    private Instant timestamp;
     private int statusCode;
 
     public SuccessResponseDTO() {}
@@ -14,7 +15,7 @@ public class SuccessResponseDTO <T>{
         this.message = message;
         this.data = data;
         this.statusCode = statusCode;
-        this.timestamp = LocalDateTime.now();
+        this.timestamp = Instant.now();
     }
 
     public String getMessage() {
@@ -33,11 +34,11 @@ public class SuccessResponseDTO <T>{
         this.data = data;
     }
 
-    public LocalDateTime getTimestamp() {
+    public Instant getTimestamp() {
         return timestamp;
     }
 
-    public void setTimestamp(LocalDateTime timestamp) {
+    public void setTimestamp(Instant timestamp) {
         this.timestamp = timestamp;
     }
 
