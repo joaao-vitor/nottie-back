@@ -17,14 +17,14 @@ public class UserController {
         this.userService = userService;
     }
 
-    @PatchMapping("/follow/user/{id}")
+    @PostMapping("/follow/user/{id}")
     public ResponseEntity<?> followUser(@PathVariable Long id) {
         userService.follow(id, UserService.FollowType.USER);
         return ResponseUtil.buildSuccessResponse(null, "User followed successfully", HttpStatus.OK);
     }
 
 
-    @PatchMapping("/follow/workstation/{id}")
+    @PostMapping("/follow/workstation/{id}")
     public ResponseEntity<?> followWorkstation(@PathVariable Long id) {
         userService.follow(id, UserService.FollowType.WORKSTATION);
         return ResponseUtil.buildSuccessResponse(null, "Workstation followed successfully", HttpStatus.OK);
