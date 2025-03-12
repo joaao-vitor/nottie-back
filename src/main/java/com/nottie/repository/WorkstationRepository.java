@@ -11,4 +11,9 @@ public interface WorkstationRepository extends JpaRepository<Workstation, Long> 
 
     Optional<Workstation> getWorkstationsById(Long id);
 
+    boolean existsByIdAndLeaders_Id(Long workstationId, Long id);
+
+    boolean existsByIdAndFollowingUsers_Id(Long workstationId, Long userId);
+
+    boolean existsByIdAndFollowingWorkstations_Id(Long workstationId, Long followId);
 }
