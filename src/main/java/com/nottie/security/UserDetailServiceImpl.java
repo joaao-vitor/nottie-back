@@ -1,4 +1,4 @@
-package com.nottie.service;
+package com.nottie.security;
 
 import com.nottie.exception.NotFoundException;
 import com.nottie.repository.UserDetailRepository;

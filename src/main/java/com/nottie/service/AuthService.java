@@ -15,6 +15,8 @@ import com.nottie.model.UserDetail;
 import com.nottie.model.VerificationToken;
 import com.nottie.repository.UserDetailRepository;
 import com.nottie.repository.UserRepository;
+import com.nottie.security.JwtService;
+import com.nottie.security.VerificationTokenService;
 import jakarta.transaction.Transactional;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;

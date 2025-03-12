@@ -1,4 +1,4 @@
-package com.nottie.service;
+package com.nottie.security;
 
 import com.nottie.exception.BadRequestException;
 import com.nottie.exception.NotFoundException;
