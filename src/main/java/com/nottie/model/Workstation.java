@@ -4,12 +4,15 @@ import com.fasterxml.jackson.annotation.JsonIgnore;
 import jakarta.persistence.*;
 import org.springframework.data.annotation.CreatedBy;
 import org.springframework.data.annotation.CreatedDate;
+import org.springframework.data.jpa.domain.support.AuditingEntityListener;
 
 import java.time.Instant;
+import java.util.HashSet;
 import java.util.Set;
 
 @Entity
 @Table(name = "workstation")
+@EntityListeners(AuditingEntityListener.class)
 public class Workstation {
     @Id
     @GeneratedValue(strategy = GenerationType.IDENTITY)
@@ -17,7 +20,7 @@ public class Workstation {
 
     @Column(nullable = false)
     private String name;
-    @Column(nullable = false)
+    @Column(nullable = false, unique = true)
     private String username;
     @Column(name = "profile_img", nullable = false)
     private String profileImg = "https://cdn.pixabay.com/photo/2015/10/05/22/37/blank-profile-picture-973460_640.png";
@@ -67,6 +70,8 @@ public class Workstation {
     private Instant createdAt;
 
     public Workstation() {
+        leaders = new HashSet<>();
+        members = new HashSet<>();
     }
 
     public Long getId() {

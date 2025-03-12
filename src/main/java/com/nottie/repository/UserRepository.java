@@ -20,4 +20,6 @@ public interface UserRepository extends JpaRepository<User, Long> {
 
     @Query("SELECT count(f) FROM User u JOIN u.following f WHERE u.id = :userId")
     Optional<Long> countFollwingByUserId(@Param("userId") Long userId);
+
+    Optional<User> getUserByUsername(String username);
 }
