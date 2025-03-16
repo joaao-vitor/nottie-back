@@ -28,6 +28,13 @@ public class WorkstationController {
         return ResponseUtil.buildSuccessResponse(createdWorkstationDTO, "Workstation created successfully", HttpStatus.CREATED);
     }
 
+    @DeleteMapping("/{workstationId}")
+    @PreAuthorize("@workstationService.isCreator(#workstationId)")
+    public ResponseEntity<?> deleteWorkstation(@PathVariable Long workstationId) {
+        workstationService.deleteWorkstation(workstationId);
+        return ResponseUtil.buildSuccessResponse("Workstation deleted successfully", HttpStatus.OK);
+    }
+
     @PostMapping("/follow/user/{workstationId}/{userId}")
     @PreAuthorize("@workstationService.isLeader(#workstationId)")
     public ResponseEntity<?> followUser(@PathVariable Long workstationId, @PathVariable Long userId) {

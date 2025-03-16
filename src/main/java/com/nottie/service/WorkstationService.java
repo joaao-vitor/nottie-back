@@ -29,14 +29,40 @@ public class WorkstationService {
     private final AuthUtil authUtil;
     private final UserRepository userRepository;
 
-
-
     public enum FollowType {USER, WORKSTATION}
 
     public WorkstationService(WorkstationRepository workstationRepository, AuthUtil authUtil, UserRepository userRepository) {
         this.workstationRepository = workstationRepository;
         this.authUtil = authUtil;
         this.userRepository = userRepository;
+    }
+
+    @Transactional
+    public CreatedWorkstationDTO createWorkstation(CreateWorkstationDTO createWorkstationDTO) {
+        if (createWorkstationDTO.name() == null || createWorkstationDTO.name().isEmpty())
+            throw new BadRequestException("Name cannot be empty");
+
+        if (createWorkstationDTO.username() == null || createWorkstationDTO.username().isEmpty())
+            throw new BadRequestException("Username cannot be empty");
+
+        if (userRepository.getUserByUsername(createWorkstationDTO.username()).isPresent()
+                || workstationRepository.getWorkstationsByUsername(createWorkstationDTO.username()).isPresent())
+            throw new BadRequestException("Username already exists");
+
+        Workstation workstation = WorkstationMapper.INSTANCE.createWorkstationDTOToWorkstation(createWorkstationDTO);
+
+        User authenticatedUser = authUtil.getAuthenticatedUser();
+
+        workstation.getLeaders().add(authenticatedUser);
+        workstation.getMembers().add(authenticatedUser);
+
+        workstationRepository.save(workstation);
+
+        return WorkstationMapper.INSTANCE.workstationToCreatedWorkstationDTO(workstation);
+    }
+
+    public void deleteWorkstation(Long workstationId) {
+        workstationRepository.deleteById(workstationId);
     }
 
     @Transactional
@@ -119,30 +145,6 @@ public class WorkstationService {
 
         workstation.getFollowingWorkstations().remove(followingWorkstation);
         workstationRepository.save(workstation);
-    }
-
-    @Transactional
-    public CreatedWorkstationDTO createWorkstation(CreateWorkstationDTO createWorkstationDTO) {
-        if (createWorkstationDTO.name() == null || createWorkstationDTO.name().isEmpty())
-            throw new BadRequestException("Name cannot be empty");
-
-        if (createWorkstationDTO.username() == null || createWorkstationDTO.username().isEmpty())
-            throw new BadRequestException("Username cannot be empty");
-
-        if (userRepository.getUserByUsername(createWorkstationDTO.username()).isPresent()
-                || workstationRepository.getWorkstationsByUsername(createWorkstationDTO.username()).isPresent())
-            throw new BadRequestException("Username already exists");
-
-        Workstation workstation = WorkstationMapper.INSTANCE.createWorkstationDTOToWorkstation(createWorkstationDTO);
-
-        User authenticatedUser = authUtil.getAuthenticatedUser();
-
-        workstation.getLeaders().add(authenticatedUser);
-        workstation.getMembers().add(authenticatedUser);
-
-        workstationRepository.save(workstation);
-
-        return WorkstationMapper.INSTANCE.workstationToCreatedWorkstationDTO(workstation);
     }
 
     public GetMembersDTO getMembers(Long workstationId, Pageable pageable) {
