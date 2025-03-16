@@ -1,6 +1,7 @@
 package com.nottie.controller;
 
 import com.nottie.dto.request.workstation.CreateWorkstationDTO;
+import com.nottie.dto.request.workstation.GetLeadersDTO;
 import com.nottie.dto.response.workstation.CreatedWorkstationDTO;
 import com.nottie.dto.response.workstation.GetMembersDTO;
 import com.nottie.service.WorkstationService;
@@ -63,6 +64,13 @@ public class WorkstationController {
     @PreAuthorize("@workstationService.isMember(#workstationId)")
     public ResponseEntity<?> getMembers(@PathVariable Long workstationId, Pageable pageable) {
         GetMembersDTO getMembersDTO = workstationService.getMembers(workstationId, pageable);
+        return ResponseUtil.buildSuccessResponse(getMembersDTO, "List of members fetched successfully!", HttpStatus.OK);
+    }
+
+    @GetMapping("/{workstationId}/leaders")
+    @PreAuthorize("@workstationService.isMember(#workstationId)")
+    public ResponseEntity<?> getLeaders(@PathVariable Long workstationId, Pageable pageable) {
+        GetLeadersDTO getLeadersDTO = workstationService.getLeaders(workstationId, pageable);
         return ResponseUtil.buildSuccessResponse(getMembersDTO, "List of members fetched successfully!", HttpStatus.OK);
     }
 }
