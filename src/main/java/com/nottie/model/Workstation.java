@@ -4,6 +4,8 @@ import com.fasterxml.jackson.annotation.JsonIgnore;
 import jakarta.persistence.*;
 import org.springframework.data.annotation.CreatedBy;
 import org.springframework.data.annotation.CreatedDate;
+import org.springframework.data.annotation.LastModifiedBy;
+import org.springframework.data.annotation.LastModifiedDate;
 import org.springframework.data.jpa.domain.support.AuditingEntityListener;
 
 import java.time.Instant;
@@ -67,14 +69,26 @@ public class Workstation {
     @CreatedBy
     @ManyToOne
     @JoinColumn(
-            name = "creator_id",
-            nullable = false
+            name = "creator_id"
     )
     private User creator;
 
     @CreatedDate
-    @Column(name = "created_at", nullable = false, updatable = false)
+    @Column(name = "created_at")
+    @Temporal(TemporalType.TIMESTAMP)
     private Instant createdAt;
+
+    @LastModifiedBy
+    @ManyToOne
+    @JoinColumn(
+            name = "updated_by"
+    )
+    private User updatedBy;
+
+    @LastModifiedDate
+    @Column(name = "updated_at")
+    @Temporal(TemporalType.TIMESTAMP)
+    private Instant updatedAt;
 
     public Workstation() {
         leaders = new HashSet<>();

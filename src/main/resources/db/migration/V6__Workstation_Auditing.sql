@@ -1,0 +1,17 @@
+ALTER TABLE workstation
+    ADD created_at TIMESTAMP WITHOUT TIME ZONE;
+
+ALTER TABLE workstation
+    ADD creator_id BIGINT;
+
+ALTER TABLE workstation
+    ADD updated_at TIMESTAMP WITHOUT TIME ZONE;
+
+ALTER TABLE workstation
+    ADD updated_by BIGINT;
+
+ALTER TABLE workstation
+    ADD CONSTRAINT FK_WORKSTATION_ON_CREATOR FOREIGN KEY (creator_id) REFERENCES users (id);
+
+ALTER TABLE workstation
+    ADD CONSTRAINT FK_WORKSTATION_ON_UPDATED_BY FOREIGN KEY (updated_by) REFERENCES users (id);

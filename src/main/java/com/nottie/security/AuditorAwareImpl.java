@@ -1,20 +1,14 @@
 package com.nottie.security;
 
 import com.nottie.model.User;
-import com.nottie.repository.UserRepository;
 import org.springframework.data.domain.AuditorAware;
 import org.springframework.security.core.Authentication;
 import org.springframework.security.core.context.SecurityContextHolder;
 import org.springframework.security.oauth2.jwt.Jwt;
 
 import java.util.Optional;
-
 public class AuditorAwareImpl implements AuditorAware<User> {
-
-    private final UserRepository userRepository;
-
-    public AuditorAwareImpl(UserRepository userRepository) {
-        this.userRepository = userRepository;
+    public AuditorAwareImpl() {
     }
 
     @Override
@@ -24,11 +18,15 @@ public class AuditorAwareImpl implements AuditorAware<User> {
             return Optional.empty();
 
         Jwt jwt = (Jwt) authentication.getPrincipal();
+
         String email = jwt.getSubject();
 
         if(email.isBlank())
             return Optional.empty();
-
-        return userRepository.findByEmailIgnoreCase(email);
+        User user = new User();
+        user.setEmail(email);
+        user.setId(jwt.getClaim("id"));
+        user.setUsername(jwt.getClaim("username"));
+        return Optional.of(user);
     }
 }

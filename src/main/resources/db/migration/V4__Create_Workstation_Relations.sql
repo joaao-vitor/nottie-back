@@ -4,8 +4,6 @@ CREATE TABLE workstation
     name        VARCHAR(255)                            NOT NULL,
     username    VARCHAR(255)                            NOT NULL,
     profile_img VARCHAR(255)                            NOT NULL,
-    creator_id  BIGINT                                  NOT NULL,
-    created_at  TIMESTAMP WITHOUT TIME ZONE             NOT NULL,
     CONSTRAINT pk_workstation PRIMARY KEY (id)
 );
 
@@ -36,9 +34,6 @@ CREATE TABLE workstation_member
     workstation_id BIGINT NOT NULL,
     CONSTRAINT pk_workstation_member PRIMARY KEY (user_id, workstation_id)
 );
-
-ALTER TABLE workstation
-    ADD CONSTRAINT FK_WORKSTATION_ON_CREATOR FOREIGN KEY (creator_id) REFERENCES users (id);
 
 ALTER TABLE workstation_follows_user
     ADD CONSTRAINT fk_worfoluse_on_user FOREIGN KEY (user_followed_id) REFERENCES users (id);
