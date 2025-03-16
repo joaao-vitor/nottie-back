@@ -2,8 +2,11 @@ package com.nottie.service;
 
 import com.nottie.dto.request.workstation.CreateWorkstationDTO;
 import com.nottie.dto.response.workstation.CreatedWorkstationDTO;
+import com.nottie.dto.response.workstation.GetMembersDTO;
+import com.nottie.dto.response.workstation.WorkstationMemberDTO;
 import com.nottie.exception.BadRequestException;
 import com.nottie.exception.NotFoundException;
+import com.nottie.mapper.UserMapper;
 import com.nottie.mapper.WorkstationMapper;
 import com.nottie.model.User;
 import com.nottie.model.Workstation;
@@ -11,7 +14,11 @@ import com.nottie.repository.UserRepository;
 import com.nottie.repository.WorkstationRepository;
 import com.nottie.util.AuthUtil;
 import jakarta.transaction.Transactional;
+import org.springframework.data.domain.Page;
+import org.springframework.data.domain.Pageable;
 import org.springframework.stereotype.Service;
+
+import java.util.List;
 
 @Service
 public class WorkstationService {
@@ -132,6 +139,30 @@ public class WorkstationService {
         workstationRepository.save(workstation);
 
         return WorkstationMapper.INSTANCE.workstationToCreatedWorkstationDTO(workstation);
+    }
+
+    public GetMembersDTO getMembers(Long workstationId, Pageable pageable) {
+        if(!workstationRepository.existsById(workstationId))
+            throw new NotFoundException("Workstation not found");
+
+        Page<User> usersPage = workstationRepository.findAllMembersByWorkstationId(workstationId, pageable);
+
+        List<WorkstationMemberDTO> members = UserMapper.INSTANCE.userListToWorkstationMemberDTOList(usersPage.getContent());
+
+        GetMembersDTO getMembersDTO = new GetMembersDTO();
+        getMembersDTO.setMembers(members);
+        getMembersDTO.setSize(pageable.getPageSize());
+        getMembersDTO.setTotalElements(pageable.getPageSize());
+        getMembersDTO.setTotalPages(pageable.getPageNumber());
+        getMembersDTO.setNumber(pageable.getPageNumber());
+
+        return getMembersDTO;
+    }
+
+    public boolean isMember(Long workstationId) {
+        User authenticatedUser = authUtil.getAuthenticatedUser();
+
+        return workstationRepository.existsByIdAndMembers_Id(workstationId, authenticatedUser.getId());
     }
 
     public boolean isLeader(Long workstationId) {
