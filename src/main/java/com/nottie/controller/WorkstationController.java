@@ -71,6 +71,8 @@ public class WorkstationController {
     @PreAuthorize("@workstationService.isMember(#workstationId)")
     public ResponseEntity<?> getLeaders(@PathVariable Long workstationId, Pageable pageable) {
         GetLeadersDTO getLeadersDTO = workstationService.getLeaders(workstationId, pageable);
-        return ResponseUtil.buildSuccessResponse(getMembersDTO, "List of members fetched successfully!", HttpStatus.OK);
+        return ResponseUtil.buildSuccessResponse(getLeadersDTO, "List of leaders fetched successfully!", HttpStatus.OK);
     }
+
+
 }

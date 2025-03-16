@@ -1,6 +1,7 @@
 package com.nottie.repository;
 
 import com.nottie.dto.response.workstation.WorkstationMemberDTO;
+import com.nottie.model.User;
 import com.nottie.model.Workstation;
 import org.springframework.data.domain.Page;
 import org.springframework.data.domain.Pageable;
@@ -32,4 +33,7 @@ public interface WorkstationRepository extends JpaRepository<Workstation, Long> 
             "> 0 THEN true ELSE false END" +
             ") FROM Workstation w JOIN w.members u WHERE w.id = :workstationId")
     Page<WorkstationMemberDTO> findAllMembersByWorkstationId(@Param("workstationId") Long workstationId, Pageable pageable);
+
+    @Query("SELECT u FROM Workstation w JOIN w.leaders u WHERE w.id = :workstationId")
+    Page<User> findAllLeadersByWorkstationId(@Param("workstationId") Long workstationId, Pageable pageable);
 }

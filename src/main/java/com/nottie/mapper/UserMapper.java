@@ -2,9 +2,9 @@ package com.nottie.mapper;
 
 import com.nottie.dto.request.auth.CreateUserDTO;
 import com.nottie.dto.request.user.UserSummaryDTO;
+import com.nottie.dto.request.workstation.WorkstationLeaderDTO;
 import com.nottie.dto.response.auth.CreatedUserDTO;
 import com.nottie.dto.response.auth.UserLoggedDTO;
-import com.nottie.dto.response.workstation.WorkstationMemberDTO;
 import com.nottie.model.User;
 import org.mapstruct.Mapper;
 import org.mapstruct.Mapping;
@@ -30,6 +30,6 @@ public interface UserMapper {
     @Mapping(target = "followersCount", ignore = true)
     UserSummaryDTO userToUserSummaryDTO(User user);
 
-    // Get Members (workstation)
-    List<WorkstationMemberDTO> userListToWorkstationMemberDTOList(List<User> userList);
+    // Get Leaders (workstation)
+    List<WorkstationLeaderDTO> userListToWorkstationLeaderDTOList(List<User> users);
 }

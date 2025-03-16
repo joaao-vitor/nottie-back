@@ -1,11 +1,14 @@
 package com.nottie.service;
 
 import com.nottie.dto.request.workstation.CreateWorkstationDTO;
+import com.nottie.dto.request.workstation.GetLeadersDTO;
+import com.nottie.dto.request.workstation.WorkstationLeaderDTO;
 import com.nottie.dto.response.workstation.CreatedWorkstationDTO;
 import com.nottie.dto.response.workstation.GetMembersDTO;
 import com.nottie.dto.response.workstation.WorkstationMemberDTO;
 import com.nottie.exception.BadRequestException;
 import com.nottie.exception.NotFoundException;
+import com.nottie.mapper.UserMapper;
 import com.nottie.mapper.WorkstationMapper;
 import com.nottie.model.User;
 import com.nottie.model.Workstation;
@@ -17,6 +20,8 @@ import org.springframework.data.domain.Page;
 import org.springframework.data.domain.Pageable;
 import org.springframework.stereotype.Service;
 
+import java.util.List;
+
 
 @Service
 public class WorkstationService {
@@ -25,7 +30,7 @@ public class WorkstationService {
     private final UserRepository userRepository;
 
 
-    public enum FollowType { USER, WORKSTATION }
+    public enum FollowType {USER, WORKSTATION}
 
     public WorkstationService(WorkstationRepository workstationRepository, AuthUtil authUtil, UserRepository userRepository) {
         this.workstationRepository = workstationRepository;
@@ -52,7 +57,7 @@ public class WorkstationService {
     }
 
     private void followWorkstation(Long workstationId, Long followId) {
-        if(workstationId.equals(followId))
+        if (workstationId.equals(followId))
             throw new BadRequestException("You can't follow the same workstation");
 
         Workstation workstation = workstationRepository.findById(workstationId)
@@ -61,7 +66,7 @@ public class WorkstationService {
         Workstation followingWorkstation = workstationRepository.findById(followId)
                 .orElseThrow(() -> new NotFoundException("Following workstation not found"));
 
-        if(workstationRepository.existsByIdAndFollowingWorkstations_Id(workstationId, followId))
+        if (workstationRepository.existsByIdAndFollowingWorkstations_Id(workstationId, followId))
             throw new BadRequestException("You're already following this workstation");
 
         workstation.getFollowingWorkstations().add(followingWorkstation);
@@ -99,7 +104,7 @@ public class WorkstationService {
     }
 
     private void unfollowWorkstation(Long workstationId, Long unfollowId) {
-        if(workstationId.equals(unfollowId))
+        if (workstationId.equals(unfollowId))
             throw new BadRequestException("You can't unfollow the same workstation");
 
         Workstation workstation = workstationRepository.findById(workstationId)
@@ -108,7 +113,7 @@ public class WorkstationService {
         Workstation followingWorkstation = workstationRepository.findById(unfollowId)
                 .orElseThrow(() -> new NotFoundException("Following workstation not found"));
 
-        if(!workstationRepository.existsByIdAndFollowingWorkstations_Id(workstationId, unfollowId))
+        if (!workstationRepository.existsByIdAndFollowingWorkstations_Id(workstationId, unfollowId))
             throw new BadRequestException("You're not following this workstation");
 
         workstation.getFollowingWorkstations().remove(followingWorkstation);
@@ -117,14 +122,14 @@ public class WorkstationService {
 
     @Transactional
     public CreatedWorkstationDTO createWorkstation(CreateWorkstationDTO createWorkstationDTO) {
-        if(createWorkstationDTO.name() == null || createWorkstationDTO.name().isEmpty())
+        if (createWorkstationDTO.name() == null || createWorkstationDTO.name().isEmpty())
             throw new BadRequestException("Name cannot be empty");
 
-        if(createWorkstationDTO.username() == null || createWorkstationDTO.username().isEmpty())
+        if (createWorkstationDTO.username() == null || createWorkstationDTO.username().isEmpty())
             throw new BadRequestException("Username cannot be empty");
 
-        if(userRepository.getUserByUsername(createWorkstationDTO.username()).isPresent()
-        || workstationRepository.getWorkstationsByUsername(createWorkstationDTO.username()).isPresent())
+        if (userRepository.getUserByUsername(createWorkstationDTO.username()).isPresent()
+                || workstationRepository.getWorkstationsByUsername(createWorkstationDTO.username()).isPresent())
             throw new BadRequestException("Username already exists");
 
         Workstation workstation = WorkstationMapper.INSTANCE.createWorkstationDTOToWorkstation(createWorkstationDTO);
@@ -140,7 +145,7 @@ public class WorkstationService {
     }
 
     public GetMembersDTO getMembers(Long workstationId, Pageable pageable) {
-        if(!workstationRepository.existsById(workstationId))
+        if (!workstationRepository.existsById(workstationId))
             throw new NotFoundException("Workstation not found");
 
         Page<WorkstationMemberDTO> usersPage = workstationRepository.findAllMembersByWorkstationId(workstationId, pageable);
@@ -155,6 +160,26 @@ public class WorkstationService {
         getMembersDTO.setNumber(pageable.getPageNumber());
 
         return getMembersDTO;
+    }
+
+    public GetLeadersDTO getLeaders(Long workstationId, Pageable pageable) {
+        if (!workstationRepository.existsById(workstationId))
+            throw new NotFoundException("Workstation not found");
+
+        Page<User> usersPage = workstationRepository.findAllLeadersByWorkstationId(workstationId, pageable);
+
+        List<WorkstationLeaderDTO> leaders = UserMapper.INSTANCE.userListToWorkstationLeaderDTOList(usersPage.getContent());
+
+        GetLeadersDTO getLeadersDTO = new GetLeadersDTO();
+
+        getLeadersDTO.setWorkstationId(workstationId);
+        getLeadersDTO.setLeaders(leaders);
+        getLeadersDTO.setSize(pageable.getPageSize());
+        getLeadersDTO.setTotalElements(usersPage.getTotalElements());
+        getLeadersDTO.setTotalPages(usersPage.getTotalPages());
+        getLeadersDTO.setNumber(pageable.getPageNumber());
+
+        return getLeadersDTO;
     }
 
     public boolean isMember(Long workstationId) {
