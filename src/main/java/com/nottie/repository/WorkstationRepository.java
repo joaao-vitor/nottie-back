@@ -50,4 +50,7 @@ public interface WorkstationRepository extends JpaRepository<Workstation, Long> 
     @Query(value = "DELETE FROM workstation_leader w WHERE w.user_id = :leaderId AND w.workstation_id = :workstationId",
             nativeQuery = true)
     void removeLeader(@Param("workstationId") Long workstationId, @Param("leaderId") Long leaderId);
+
+
+    boolean existsByUsername(String username);
 }

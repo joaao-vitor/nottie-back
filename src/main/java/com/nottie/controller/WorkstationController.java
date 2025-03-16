@@ -1,8 +1,10 @@
 package com.nottie.controller;
 
 import com.nottie.dto.request.workstation.CreateWorkstationDTO;
+import com.nottie.dto.request.workstation.EditWorkstationDTO;
 import com.nottie.dto.request.workstation.GetLeadersDTO;
 import com.nottie.dto.response.workstation.CreatedWorkstationDTO;
+import com.nottie.dto.response.workstation.EditedWorkstationDTO;
 import com.nottie.dto.response.workstation.GetMembersDTO;
 import com.nottie.service.WorkstationService;
 import com.nottie.util.ResponseUtil;
@@ -33,6 +35,13 @@ public class WorkstationController {
     public ResponseEntity<?> deleteWorkstation(@PathVariable Long workstationId) {
         workstationService.deleteWorkstation(workstationId);
         return ResponseUtil.buildSuccessResponse("Workstation deleted successfully", HttpStatus.OK);
+    }
+
+    @PutMapping("/{workstationId}")
+    @PreAuthorize("@workstationService.isLeader(#workstationId)")
+    public ResponseEntity<?> updateWorkstation(@PathVariable Long workstationId, @RequestBody EditWorkstationDTO editWorkstationDTO) {
+        EditedWorkstationDTO editedWorkstationDTO = workstationService.editWorkstation(workstationId, editWorkstationDTO);
+        return ResponseUtil.buildSuccessResponse(editedWorkstationDTO, "Workstation updated successfully", HttpStatus.OK);
     }
 
     @PostMapping("/follow/user/{workstationId}/{userId}")

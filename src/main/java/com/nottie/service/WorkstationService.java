@@ -1,9 +1,11 @@
 package com.nottie.service;
 
 import com.nottie.dto.request.workstation.CreateWorkstationDTO;
+import com.nottie.dto.request.workstation.EditWorkstationDTO;
 import com.nottie.dto.request.workstation.GetLeadersDTO;
 import com.nottie.dto.request.workstation.WorkstationLeaderDTO;
 import com.nottie.dto.response.workstation.CreatedWorkstationDTO;
+import com.nottie.dto.response.workstation.EditedWorkstationDTO;
 import com.nottie.dto.response.workstation.GetMembersDTO;
 import com.nottie.dto.response.workstation.WorkstationMemberDTO;
 import com.nottie.exception.BadRequestException;
@@ -28,6 +30,7 @@ public class WorkstationService {
     private final WorkstationRepository workstationRepository;
     private final AuthUtil authUtil;
     private final UserRepository userRepository;
+
 
     public enum FollowType {USER, WORKSTATION}
 
@@ -63,6 +66,27 @@ public class WorkstationService {
 
     public void deleteWorkstation(Long workstationId) {
         workstationRepository.deleteById(workstationId);
+    }
+
+    public EditedWorkstationDTO editWorkstation(Long workstationId, EditWorkstationDTO editWorkstationDTO) {
+
+        Workstation workstation = workstationRepository.findById(workstationId)
+                .orElseThrow(() -> new NotFoundException("Workstation not found"));
+
+        if(workstationRepository.existsByUsername(editWorkstationDTO.username()))
+            throw new BadRequestException("Username already exists");
+
+        if (editWorkstationDTO.name() != null) {
+            workstation.setName(editWorkstationDTO.name());
+        }
+
+        if (editWorkstationDTO.username() != null) {
+            workstation.setUsername(editWorkstationDTO.username());
+        }
+
+        workstationRepository.save(workstation);
+
+        return WorkstationMapper.INSTANCE.workstationToEditedWorkstationDTO(workstation);
     }
 
     @Transactional
@@ -187,9 +211,9 @@ public class WorkstationService {
 
     @Transactional
     public void addNewLeader(Long workstationId, Long leaderId) {
-        if(!workstationRepository.existsById(workstationId))
+        if (!workstationRepository.existsById(workstationId))
             throw new NotFoundException("Workstation not found");
-        if(!userRepository.existsById(leaderId))
+        if (!userRepository.existsById(leaderId))
             throw new NotFoundException("User not found");
 
         workstationRepository.addNewLeader(workstationId, leaderId);
@@ -197,11 +221,11 @@ public class WorkstationService {
 
     @Transactional
     public void removeLeader(Long workstationId, Long leaderId) {
-        if(!workstationRepository.existsById(workstationId))
+        if (!workstationRepository.existsById(workstationId))
             throw new NotFoundException("Workstation not found");
-        if(!userRepository.existsById(leaderId))
+        if (!userRepository.existsById(leaderId))
             throw new NotFoundException("User not found");
-        if(!workstationRepository.existsLeaderById(workstationId, leaderId))
+        if (!workstationRepository.existsLeaderById(workstationId, leaderId))
             throw new BadRequestException("This user is not a leader of this workstation");
 
         workstationRepository.removeLeader(workstationId, leaderId);
