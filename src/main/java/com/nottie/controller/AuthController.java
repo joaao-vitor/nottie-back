@@ -9,6 +9,7 @@ import com.nottie.dto.response.auth.RefreshTokenResponseDTO;
 import com.nottie.service.AuthService;
 import com.nottie.security.VerificationTokenService;
 import com.nottie.util.ResponseUtil;
+import jakarta.validation.Valid;
 import org.springframework.http.HttpStatus;
 import org.springframework.http.ResponseEntity;
 import org.springframework.web.bind.annotation.*;
@@ -26,7 +27,7 @@ public class AuthController {
     }
 
     @PostMapping("/sign-up")
-    public ResponseEntity<?> registerUser(@RequestBody CreateUserDTO createUserDTO){
+    public ResponseEntity<?> registerUser(@RequestBody @Valid CreateUserDTO createUserDTO){
         CreatedUserDTO createdUserDTO = authService.createUser(createUserDTO);
         return ResponseUtil.buildSuccessResponse(createdUserDTO, "User created successfully, verify your email", HttpStatus.CREATED);
     }
