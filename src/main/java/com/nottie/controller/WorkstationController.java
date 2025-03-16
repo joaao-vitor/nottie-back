@@ -2,10 +2,8 @@ package com.nottie.controller;
 
 import com.nottie.dto.request.workstation.CreateWorkstationDTO;
 import com.nottie.dto.response.workstation.CreatedWorkstationDTO;
-import com.nottie.dto.response.workstation.GetMembersDTO;
 import com.nottie.service.WorkstationService;
 import com.nottie.util.ResponseUtil;
-import org.springframework.data.domain.Pageable;
 import org.springframework.http.HttpStatus;
 import org.springframework.http.ResponseEntity;
 import org.springframework.security.access.prepost.PreAuthorize;
@@ -57,12 +55,5 @@ public class WorkstationController {
         workstationService.unfollow(workstationId, followId, WorkstationService.FollowType.WORKSTATION);
 
         return ResponseUtil.buildSuccessResponse("Workstation unfollowed successfully", HttpStatus.OK);
-    }
-
-    @GetMapping("/{workstationId}/members")
-    @PreAuthorize("@workstationService.isMember(#workstationId)")
-    public ResponseEntity<?> getMembers(@PathVariable Long workstationId, Pageable pageable) {
-        GetMembersDTO getMembersDTO = workstationService.getMembers(workstationId, pageable);
-        return ResponseUtil.buildSuccessResponse(getMembersDTO, "List of members fetched successfully!", HttpStatus.OK);
     }
 }
