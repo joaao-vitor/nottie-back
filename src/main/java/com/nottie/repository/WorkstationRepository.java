@@ -1,6 +1,6 @@
 package com.nottie.repository;
 
-import com.nottie.model.User;
+import com.nottie.dto.response.workstation.WorkstationMemberDTO;
 import com.nottie.model.Workstation;
 import org.springframework.data.domain.Page;
 import org.springframework.data.domain.Pageable;
@@ -24,6 +24,12 @@ public interface WorkstationRepository extends JpaRepository<Workstation, Long> 
 
     boolean existsByIdAndMembers_Id(Long workstationId, Long id);
 
-    @Query("SELECT u FROM Workstation w JOIN w.members u WHERE w.id = :workstationId")
-    Page<User> findAllMembersByWorkstationId(@Param("workstationId") Long workstationId, Pageable pageable);
+    @Query("SELECT " +
+            "new com.nottie.dto.response.workstation.WorkstationMemberDTO(" +
+            "u.id, u.name, u.username, u.profileImg, " +
+            "CASE WHEN " +
+            "(SELECT count(l) FROM Workstation w2 JOIN w2.leaders l WHERE u.id = l.id AND w.id = :workstationId) " +
+            "> 0 THEN true ELSE false END" +
+            ") FROM Workstation w JOIN w.members u WHERE w.id = :workstationId")
+    Page<WorkstationMemberDTO> findAllMembersByWorkstationId(@Param("workstationId") Long workstationId, Pageable pageable);
 }

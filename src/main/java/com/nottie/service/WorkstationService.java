@@ -6,7 +6,6 @@ import com.nottie.dto.response.workstation.GetMembersDTO;
 import com.nottie.dto.response.workstation.WorkstationMemberDTO;
 import com.nottie.exception.BadRequestException;
 import com.nottie.exception.NotFoundException;
-import com.nottie.mapper.UserMapper;
 import com.nottie.mapper.WorkstationMapper;
 import com.nottie.model.User;
 import com.nottie.model.Workstation;
@@ -18,7 +17,6 @@ import org.springframework.data.domain.Page;
 import org.springframework.data.domain.Pageable;
 import org.springframework.stereotype.Service;
 
-import java.util.List;
 
 @Service
 public class WorkstationService {
@@ -145,15 +143,15 @@ public class WorkstationService {
         if(!workstationRepository.existsById(workstationId))
             throw new NotFoundException("Workstation not found");
 
-        Page<User> usersPage = workstationRepository.findAllMembersByWorkstationId(workstationId, pageable);
-
-        List<WorkstationMemberDTO> members = UserMapper.INSTANCE.userListToWorkstationMemberDTOList(usersPage.getContent());
+        Page<WorkstationMemberDTO> usersPage = workstationRepository.findAllMembersByWorkstationId(workstationId, pageable);
 
         GetMembersDTO getMembersDTO = new GetMembersDTO();
-        getMembersDTO.setMembers(members);
+
+        getMembersDTO.setWorkstationId(workstationId);
+        getMembersDTO.setMembers(usersPage.getContent());
         getMembersDTO.setSize(pageable.getPageSize());
-        getMembersDTO.setTotalElements(pageable.getPageSize());
-        getMembersDTO.setTotalPages(pageable.getPageNumber());
+        getMembersDTO.setTotalElements(usersPage.getTotalElements());
+        getMembersDTO.setTotalPages(usersPage.getTotalPages());
         getMembersDTO.setNumber(pageable.getPageNumber());
 
         return getMembersDTO;
