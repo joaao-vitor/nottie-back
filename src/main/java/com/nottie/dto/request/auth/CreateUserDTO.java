@@ -10,10 +10,10 @@ public record CreateUserDTO(
         @Email(message = "Email is not valid")
         String email,
         @Size(min = 8, message = "Password must be at least 8 characters")
-        @Pattern(regexp = "^(?=.*[a-z])(?=.*[A-Z])(?=.*\\\\d)(?=.*[@#$%^&+=]).{8,}$", message = "The password must have at least 8 characters, one special symbol and one uppercase letter")
+        @Pattern(regexp = "^(?=.*\\d)(?=.*[a-z])(?=.*[A-Z])(?=.*[a-zA-Z]).{8,}$", message = "The password must have at least 8 characters, one special symbol and one uppercase letter")
         String password,
         @Size(min = 8, message = "Confirm Password must be at least 8 characters")
-        @Pattern(regexp = "^(?=.*[a-z])(?=.*[A-Z])(?=.*\\\\d)(?=.*[@#$%^&+=]).{8,}$", message = "The password must have at least 8 characters, one special symbol and one uppercase letter")
+        @Pattern(regexp = "^(?=.*\\d)(?=.*[a-z])(?=.*[A-Z])(?=.*[a-zA-Z]).{8,}$", message = "The password must have at least 8 characters, one special symbol and one uppercase letter")
         String confirmPassword,
         @NotBlank(message = "Name can't be blank")
         @NotNull(message = "Name can't be null")
