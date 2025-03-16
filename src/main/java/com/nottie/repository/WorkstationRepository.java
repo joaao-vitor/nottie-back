@@ -6,6 +6,7 @@ import com.nottie.model.Workstation;
 import org.springframework.data.domain.Page;
 import org.springframework.data.domain.Pageable;
 import org.springframework.data.jpa.repository.JpaRepository;
+import org.springframework.data.jpa.repository.Modifying;
 import org.springframework.data.jpa.repository.Query;
 import org.springframework.data.repository.query.Param;
 
@@ -36,4 +37,17 @@ public interface WorkstationRepository extends JpaRepository<Workstation, Long> 
 
     @Query("SELECT u FROM Workstation w JOIN w.leaders u WHERE w.id = :workstationId")
     Page<User> findAllLeadersByWorkstationId(@Param("workstationId") Long workstationId, Pageable pageable);
+
+    @Modifying
+    @Query(value = "INSERT INTO workstation_leader (user_id, workstation_id) VALUES (:leaderId, :workstationId)",
+            nativeQuery = true)
+    void addNewLeader(@Param("workstationId") Long workstationId, @Param("leaderId") Long leaderId);
+
+    @Query("SELECT count(l) > 0 FROM Workstation w JOIN w.leaders l WHERE w.id = :workstationId AND l.id = :leaderId")
+    boolean existsLeaderById(@Param("workstationId") Long workstationId, @Param("leaderId") Long leaderId);
+
+    @Modifying
+    @Query(value = "DELETE FROM workstation_leader w WHERE w.user_id = :leaderId AND w.workstation_id = :workstationId",
+            nativeQuery = true)
+    void removeLeader(@Param("workstationId") Long workstationId, @Param("leaderId") Long leaderId);
 }

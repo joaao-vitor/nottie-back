@@ -30,6 +30,7 @@ public class WorkstationService {
     private final UserRepository userRepository;
 
 
+
     public enum FollowType {USER, WORKSTATION}
 
     public WorkstationService(WorkstationRepository workstationRepository, AuthUtil authUtil, UserRepository userRepository) {
@@ -182,6 +183,28 @@ public class WorkstationService {
         return getLeadersDTO;
     }
 
+    @Transactional
+    public void addNewLeader(Long workstationId, Long leaderId) {
+        if(!workstationRepository.existsById(workstationId))
+            throw new NotFoundException("Workstation not found");
+        if(!userRepository.existsById(leaderId))
+            throw new NotFoundException("User not found");
+
+        workstationRepository.addNewLeader(workstationId, leaderId);
+    }
+
+    @Transactional
+    public void removeLeader(Long workstationId, Long leaderId) {
+        if(!workstationRepository.existsById(workstationId))
+            throw new NotFoundException("Workstation not found");
+        if(!userRepository.existsById(leaderId))
+            throw new NotFoundException("User not found");
+        if(!workstationRepository.existsLeaderById(workstationId, leaderId))
+            throw new BadRequestException("This user is not a leader of this workstation");
+
+        workstationRepository.removeLeader(workstationId, leaderId);
+    }
+
     public boolean isMember(Long workstationId) {
         User authenticatedUser = authUtil.getAuthenticatedUser();
 
@@ -192,6 +215,13 @@ public class WorkstationService {
         User authenticatedUser = authUtil.getAuthenticatedUser();
 
         return workstationRepository.existsByIdAndLeaders_Id(workstationId, authenticatedUser.getId());
+    }
+
+    public boolean isCreator(Long workstationId) {
+        User authenticatedUser = authUtil.getAuthenticatedUser();
+        Workstation workstation = workstationRepository.findById(workstationId).orElseThrow(() -> new NotFoundException("Workstation not found"));
+
+        return workstation.getCreator().equals(authenticatedUser);
     }
 
 }

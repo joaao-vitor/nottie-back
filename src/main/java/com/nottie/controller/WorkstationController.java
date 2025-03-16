@@ -74,5 +74,20 @@ public class WorkstationController {
         return ResponseUtil.buildSuccessResponse(getLeadersDTO, "List of leaders fetched successfully!", HttpStatus.OK);
     }
 
+    @PatchMapping("/{workstationId}/add/leader/{leaderId}")
+    @PreAuthorize("@workstationService.isCreator(#workstationId)")
+    public ResponseEntity<?> addNewLeader(@PathVariable Long workstationId, @PathVariable Long leaderId) {
+        workstationService.addNewLeader(workstationId, leaderId);
+        return ResponseUtil.buildSuccessResponse("Leader added successfully", HttpStatus.OK);
+    }
+
+
+    @DeleteMapping("/{workstationId}/remove/leader/{leaderId}")
+    @PreAuthorize("@workstationService.isCreator(#workstationId)")
+    public ResponseEntity<?> removeLeader(@PathVariable Long workstationId, @PathVariable Long leaderId) {
+        workstationService.removeLeader(workstationId, leaderId);
+
+        return ResponseUtil.buildSuccessResponse("Leader removed successfully", HttpStatus.OK);
+    }
 
 }

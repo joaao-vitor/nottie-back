@@ -1,8 +1,6 @@
 package com.nottie.dto.request.workstation;
 
 import com.nottie.dto.common.PageableDTO;
-import com.nottie.dto.response.workstation.WorkstationMemberDTO;
-
 import java.util.List;
 import java.util.Objects;
 
