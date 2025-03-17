@@ -3,6 +3,7 @@ package com.nottie.service;
 import com.nottie.dto.request.user.EditUserDTO;
 import com.nottie.dto.request.user.UserSummaryDTO;
 import com.nottie.dto.response.user.EditedUserDTO;
+import com.nottie.dto.response.workstation.ProfileImgDTO;
 import com.nottie.exception.BadRequestException;
 import com.nottie.exception.NotFoundException;
 import com.nottie.exception.UnauthorizedException;
@@ -13,6 +14,7 @@ import com.nottie.repository.WorkstationRepository;
 import com.nottie.util.AuthUtil;
 import jakarta.transaction.Transactional;
 import org.springframework.stereotype.Service;
+import org.springframework.web.multipart.MultipartFile;
 
 @Service
 public class UserService {
@@ -20,13 +22,15 @@ public class UserService {
     private final UserRepository userRepository;
     private final AuthUtil authUtil;
     private final WorkstationRepository workstationRepository;
+    private final CloudinaryService cloudinaryService;
 
     public enum FollowType { USER, WORKSTATION }
 
-    public UserService(UserRepository userRepository, AuthUtil authUtil, WorkstationRepository workstationRepository) {
+    public UserService(UserRepository userRepository, AuthUtil authUtil, WorkstationRepository workstationRepository, CloudinaryService cloudinaryService) {
         this.userRepository = userRepository;
         this.authUtil = authUtil;
         this.workstationRepository = workstationRepository;
+        this.cloudinaryService = cloudinaryService;
     }
 
     @Transactional
@@ -44,6 +48,24 @@ public class UserService {
         userRepository.save(userAuthenticated);
 
         return UserMapper.INSTANCE.userToEditedUserDTO(userAuthenticated);
+    }
+    @Transactional
+    public ProfileImgDTO editUserProfileImg(Long userId, MultipartFile profileImg) {
+        User userAuthenticated = authUtil.getAuthenticatedUser();
+        if (!userAuthenticated.getId().equals(userId))
+            throw new UnauthorizedException("You are not authorized to update this User");
+
+        if(profileImg.isEmpty())
+            throw new BadRequestException("Profile image cannot be empty");
+
+        if(profileImg.getContentType() != null && !profileImg.getContentType().startsWith("image"))
+            throw new BadRequestException("Profile image must be an image");
+
+        String folderName = "users/" + userAuthenticated.getId() + "/profile-img";
+        String imgUrl = cloudinaryService.uploadImage(profileImg, folderName);
+        userAuthenticated.setProfileImg(imgUrl);
+        userRepository.save(userAuthenticated);
+        return new ProfileImgDTO(userAuthenticated.getProfileImg());
     }
 
     public void deleteUser(Long id) {

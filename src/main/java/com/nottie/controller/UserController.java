@@ -3,12 +3,14 @@ package com.nottie.controller;
 import com.nottie.dto.request.user.EditUserDTO;
 import com.nottie.dto.request.user.UserSummaryDTO;
 import com.nottie.dto.response.user.EditedUserDTO;
+import com.nottie.dto.response.workstation.ProfileImgDTO;
 import com.nottie.service.UserService;
 import com.nottie.util.ResponseUtil;
 import jakarta.validation.Valid;
 import org.springframework.http.HttpStatus;
 import org.springframework.http.ResponseEntity;
 import org.springframework.web.bind.annotation.*;
+import org.springframework.web.multipart.MultipartFile;
 
 @RestController
 @RequestMapping(value = "/user")
@@ -24,6 +26,12 @@ public class UserController {
     public ResponseEntity<?> updateUser(@PathVariable Long id, @RequestBody @Valid EditUserDTO editUserDTO) {
         EditedUserDTO editedUserDTO = userService.updateUser(id, editUserDTO);
         return ResponseUtil.buildSuccessResponse(editedUserDTO, "User updated successfully", HttpStatus.OK);
+    }
+
+    @PatchMapping("/{id}/profile-img")
+    public ResponseEntity<?> editWorkstationProfileImg(@PathVariable Long id, @RequestParam(value = "image") MultipartFile image) {
+        ProfileImgDTO profileImgDTO = userService.editUserProfileImg(id, image);
+        return ResponseUtil.buildSuccessResponse(profileImgDTO, "Profile image updated successfully", HttpStatus.OK);
     }
 
     @DeleteMapping("/{id}")
