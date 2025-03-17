@@ -3,6 +3,7 @@ package com.nottie.model;
 import com.fasterxml.jackson.annotation.JsonIgnore;
 import jakarta.persistence.*;
 import java.util.List;
+import java.util.Set;
 
 @Entity
 @Table(name = "users")
@@ -35,10 +36,10 @@ public class User {
             inverseJoinColumns = {@JoinColumn(name = "user_followed_id")}
     )
     @JsonIgnore
-    private List<User> followingUsers;
+    private Set<User> followingUsers;
 
     @ManyToMany(mappedBy = "followingUsers")
-    private List<User> followersUsers;
+    private Set<User> followersUsers;
 
     @ManyToMany
     @JoinTable(
@@ -46,28 +47,28 @@ public class User {
             joinColumns = {@JoinColumn(name = "user_id")},
             inverseJoinColumns = {@JoinColumn(name = "workstation_id")}
     )
-    private List<Workstation> followingWorkstations;
+    private Set<Workstation> followingWorkstations;
 
     @ManyToMany(mappedBy = "followingUsers")
-    private List<Workstation> followersWorkstations;
+    private Set<Workstation> followersWorkstations;
 
 
 
     public User() {}
 
-    public List<Workstation> getFollowingWorkstations() {
+    public Set<Workstation> getFollowingWorkstations() {
         return followingWorkstations;
     }
 
-    public void setFollowingWorkstations(List<Workstation> followingWorkstations) {
+    public void setFollowingWorkstations(Set<Workstation> followingWorkstations) {
         this.followingWorkstations = followingWorkstations;
     }
 
-    public List<Workstation> getFollowersWorkstations() {
+    public Set<Workstation> getFollowersWorkstations() {
         return followersWorkstations;
     }
 
-    public void setFollowersWorkstations(List<Workstation> followersWorkstations) {
+    public void setFollowersWorkstations(Set<Workstation> followersWorkstations) {
         this.followersWorkstations = followersWorkstations;
     }
 
@@ -119,19 +120,19 @@ public class User {
         this.profileImg = profileImg;
     }
 
-    public List<User> getFollowingUsers() {
+    public Set<User> getFollowingUsers() {
         return followingUsers;
     }
 
-    public void setFollowingUsers(List<User> followingUsers) {
+    public void setFollowingUsers(Set<User> followingUsers) {
         this.followingUsers = followingUsers;
     }
 
-    public List<User> getFollowersUsers() {
+    public Set<User> getFollowersUsers() {
         return followersUsers;
     }
 
-    public void setFollowersUsers(List<User> followersUsers) {
+    public void setFollowersUsers(Set<User> followersUsers) {
         this.followersUsers = followersUsers;
     }
 }
