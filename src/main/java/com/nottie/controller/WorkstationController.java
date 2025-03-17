@@ -6,6 +6,7 @@ import com.nottie.dto.request.workstation.GetLeadersDTO;
 import com.nottie.dto.response.workstation.CreatedWorkstationDTO;
 import com.nottie.dto.response.workstation.EditedWorkstationDTO;
 import com.nottie.dto.response.workstation.GetMembersDTO;
+import com.nottie.dto.response.workstation.ProfileImgDTO;
 import com.nottie.service.WorkstationService;
 import com.nottie.util.ResponseUtil;
 import org.springframework.data.domain.Pageable;
@@ -13,6 +14,7 @@ import org.springframework.http.HttpStatus;
 import org.springframework.http.ResponseEntity;
 import org.springframework.security.access.prepost.PreAuthorize;
 import org.springframework.web.bind.annotation.*;
+import org.springframework.web.multipart.MultipartFile;
 
 @RestController
 @RequestMapping("/workstation")
@@ -42,6 +44,13 @@ public class WorkstationController {
     public ResponseEntity<?> updateWorkstation(@PathVariable Long workstationId, @RequestBody EditWorkstationDTO editWorkstationDTO) {
         EditedWorkstationDTO editedWorkstationDTO = workstationService.editWorkstation(workstationId, editWorkstationDTO);
         return ResponseUtil.buildSuccessResponse(editedWorkstationDTO, "Workstation updated successfully", HttpStatus.OK);
+    }
+
+    @PatchMapping("/{workstationId}/profile-img")
+    @PreAuthorize("@workstationService.isLeader(#workstationId)")
+    public ResponseEntity<?> editWorkstationProfileImg(@PathVariable Long workstationId, @RequestParam(value = "image", required = true) MultipartFile image) {
+        ProfileImgDTO profileImgDTO = workstationService.editWorkstationProfileImg(workstationId, image);
+        return ResponseUtil.buildSuccessResponse(profileImgDTO, "Profile image updated successfully", HttpStatus.OK);
     }
 
     @PostMapping("/follow/user/{workstationId}/{userId}")

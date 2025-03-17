@@ -4,10 +4,7 @@ import com.nottie.dto.request.workstation.CreateWorkstationDTO;
 import com.nottie.dto.request.workstation.EditWorkstationDTO;
 import com.nottie.dto.request.workstation.GetLeadersDTO;
 import com.nottie.dto.request.workstation.WorkstationLeaderDTO;
-import com.nottie.dto.response.workstation.CreatedWorkstationDTO;
-import com.nottie.dto.response.workstation.EditedWorkstationDTO;
-import com.nottie.dto.response.workstation.GetMembersDTO;
-import com.nottie.dto.response.workstation.WorkstationMemberDTO;
+import com.nottie.dto.response.workstation.*;
 import com.nottie.exception.BadRequestException;
 import com.nottie.exception.NotFoundException;
 import com.nottie.mapper.UserMapper;
@@ -21,6 +18,7 @@ import jakarta.transaction.Transactional;
 import org.springframework.data.domain.Page;
 import org.springframework.data.domain.Pageable;
 import org.springframework.stereotype.Service;
+import org.springframework.web.multipart.MultipartFile;
 
 import java.util.List;
 
@@ -30,14 +28,16 @@ public class WorkstationService {
     private final WorkstationRepository workstationRepository;
     private final AuthUtil authUtil;
     private final UserRepository userRepository;
+    private final CloudinaryService cloudinaryService;
 
 
     public enum FollowType {USER, WORKSTATION}
 
-    public WorkstationService(WorkstationRepository workstationRepository, AuthUtil authUtil, UserRepository userRepository) {
+    public WorkstationService(WorkstationRepository workstationRepository, AuthUtil authUtil, UserRepository userRepository, CloudinaryService cloudinaryService) {
         this.workstationRepository = workstationRepository;
         this.authUtil = authUtil;
         this.userRepository = userRepository;
+        this.cloudinaryService = cloudinaryService;
     }
 
     @Transactional
@@ -73,7 +73,7 @@ public class WorkstationService {
         Workstation workstation = workstationRepository.findById(workstationId)
                 .orElseThrow(() -> new NotFoundException("Workstation not found"));
 
-        if(workstationRepository.existsByUsername(editWorkstationDTO.username()))
+        if (workstationRepository.existsByUsername(editWorkstationDTO.username()))
             throw new BadRequestException("Username already exists");
 
         if (editWorkstationDTO.name() != null) {
@@ -87,6 +87,25 @@ public class WorkstationService {
         workstationRepository.save(workstation);
 
         return WorkstationMapper.INSTANCE.workstationToEditedWorkstationDTO(workstation);
+    }
+
+    @Transactional
+    public ProfileImgDTO editWorkstationProfileImg(Long workstationId, MultipartFile profileImg) {
+        Workstation workstation = workstationRepository.findById(workstationId).orElseThrow(
+                () -> new NotFoundException("Workstation not found")
+        );
+
+        if(profileImg.isEmpty())
+            throw new BadRequestException("Profile image cannot be empty");
+
+        if(profileImg.getContentType() != null && !profileImg.getContentType().startsWith("image"))
+            throw new BadRequestException("Profile image must be an image");
+
+        String folderName = "workstations/" + workstation.getId() + "/profile-img";
+        String imgUrl = cloudinaryService.uploadImage(profileImg, folderName);
+        workstation.setProfileImg(imgUrl);
+        workstationRepository.save(workstation);
+        return new ProfileImgDTO(workstation.getProfileImg());
     }
 
     @Transactional
