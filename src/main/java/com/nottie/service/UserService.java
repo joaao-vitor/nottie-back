@@ -2,9 +2,9 @@ package com.nottie.service;
 
 import com.nottie.dto.request.user.UserSummaryDTO;
 import com.nottie.exception.BadRequestException;
+import com.nottie.exception.NotFoundException;
 import com.nottie.mapper.UserMapper;
 import com.nottie.model.User;
-import com.nottie.model.Workstation;
 import com.nottie.repository.UserRepository;
 import com.nottie.repository.WorkstationRepository;
 import com.nottie.util.AuthUtil;
@@ -50,59 +50,55 @@ public class UserService {
         if(userAuthenticated.getId().equals(followId))
             throw new BadRequestException("You can not follow yourself");
 
-        User userFollowed = userRepository.getUserById(followId).orElseThrow(
-                () -> new BadRequestException("User not found")
-        );
+        if(!userRepository.existsById(followId))
+            throw new NotFoundException("User not found");
 
-        if(userAuthenticated.getFollowingUsers().contains(userFollowed))
+        System.out.println(userRepository.existsByIdAndFollowingUsers_Id(userAuthenticated.getId(), followId));
+        if(userRepository.existsByIdAndFollowingUsers_Id(userAuthenticated.getId(), followId))
             throw new BadRequestException("You're already following this user");
 
-        userAuthenticated.getFollowingUsers().add(userFollowed);
-        userRepository.save(userAuthenticated);
+        userRepository.followUser(userAuthenticated.getId(), followId);
     }
 
 
-    private void unfollowUser(Long followId){
+    private void unfollowUser(Long unfollowId){
         User userAuthenticated = authUtil.getAuthenticatedUser();
 
-        if(userAuthenticated.getId().equals(followId))
+        if(userAuthenticated.getId().equals(unfollowId))
             throw new BadRequestException("You can not unfollow yourself");
 
-        User userFollowed = userRepository.getUserById(followId).orElseThrow(
-                () -> new BadRequestException("User not found")
-        );
 
-        if(!userAuthenticated.getFollowingUsers().contains(userFollowed))
+        if(!userRepository.existsById(unfollowId))
+            throw new NotFoundException("User not found");
+
+        if(!userRepository.existsByIdAndFollowingUsers_Id(userAuthenticated.getId(), unfollowId))
             throw new BadRequestException("You're not following this user");
 
-        userAuthenticated.getFollowingUsers().remove(userFollowed);
-        userRepository.save(userAuthenticated);
+        userRepository.unfollowUser(userAuthenticated.getId(), unfollowId);
     }
 
     private void followWorkstation(Long workstationId){
         User userAuthenticated = authUtil.getAuthenticatedUser();
 
-        Workstation workstation = workstationRepository.getWorkstationsById(workstationId)
-                .orElseThrow(() -> new BadRequestException("Workstation not found"));
+        if(!workstationRepository.existsById(workstationId))
+            throw new NotFoundException("Workstation not found");
 
-        if(userAuthenticated.getFollowingWorkstations().contains(workstation))
-            throw new BadRequestException("You're already following this workstation");
+        if(userRepository.existsByIdAndFollowingWorkstations_Id(userAuthenticated.getId(), workstationId))
+            throw new NotFoundException("You're already following workstation");
 
-        userAuthenticated.getFollowingWorkstations().add(workstation);
-        userRepository.save(userAuthenticated);
+        userRepository.followWorkstation(userAuthenticated.getId(), workstationId);
     }
 
     private void unfollowWorkstation(Long workstationId){
         User userAuthenticated = authUtil.getAuthenticatedUser();
 
-        Workstation workstation = workstationRepository.getWorkstationsById(workstationId)
-                .orElseThrow(() -> new BadRequestException("Workstation not found"));
+        if(!workstationRepository.existsById(workstationId))
+            throw new NotFoundException("Workstation not found");
 
-        if(!userAuthenticated.getFollowingWorkstations().contains(workstation))
-            throw new BadRequestException("You're not following this workstation");
+        if(!userRepository.existsByIdAndFollowingWorkstations_Id(userAuthenticated.getId(), workstationId))
+            throw new NotFoundException("You're not following workstation");
 
-        userAuthenticated.getFollowingWorkstations().remove(workstation);
-        userRepository.save(userAuthenticated);
+        userRepository.unfollowWorkstation(userAuthenticated.getId(), workstationId);
     }
 
     public UserSummaryDTO getUserSummary(Long id) {
