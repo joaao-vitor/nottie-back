@@ -29,6 +29,7 @@
     <properties>
         <java.version>17</java.version>
         <org.mapstruct.version>1.6.3</org.mapstruct.version>
+        <cloudinary.version>2.2.0</cloudinary.version>
         <flyway.user>postgres</flyway.user>
         <flyway.password>postgres</flyway.password>
         <flyway.schemas>nottie_db</flyway.schemas>
@@ -98,6 +99,11 @@
         <dependency>
             <groupId>org.flywaydb</groupId>
             <artifactId>flyway-database-postgresql</artifactId>
+        </dependency>
+        <dependency>
+            <groupId>com.cloudinary</groupId>
+            <artifactId>cloudinary-http5</artifactId>
+            <version>${cloudinary.version}</version>
         </dependency>
     </dependencies>
 
