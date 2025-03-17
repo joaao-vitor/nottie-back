@@ -130,64 +130,60 @@ public class WorkstationService {
         if (workstationId.equals(followId))
             throw new BadRequestException("You can't follow the same workstation");
 
-        Workstation workstation = workstationRepository.findById(workstationId)
-                .orElseThrow(() -> new NotFoundException("Workstation not found"));
+        if(!workstationRepository.existsById(workstationId))
+            throw new NotFoundException("Workstation not found");
 
-        Workstation followingWorkstation = workstationRepository.findById(followId)
-                .orElseThrow(() -> new NotFoundException("Following workstation not found"));
+        if(!workstationRepository.existsById(followId))
+            throw new NotFoundException("Following workstation not found");
 
         if (workstationRepository.existsByIdAndFollowingWorkstations_Id(workstationId, followId))
             throw new BadRequestException("You're already following this workstation");
 
-        workstation.getFollowingWorkstations().add(followingWorkstation);
-        workstationRepository.save(workstation);
+        workstationRepository.followWorkstation(workstationId, followId);
     }
 
     private void followUser(Long workstationId, Long userId) {
-        Workstation workstation = workstationRepository.findById(workstationId)
-                .orElseThrow(() -> new NotFoundException("Workstation not found"));
+        if(!workstationRepository.existsById(workstationId))
+            throw new NotFoundException("Workstation not found");
 
-        User user = userRepository.findById(userId)
-                .orElseThrow(() -> new NotFoundException("User not found"));
+        if(!userRepository.existsById(userId))
+            throw new NotFoundException("User not found");
 
         if (workstationRepository.existsByIdAndFollowingUsers_Id(workstationId, userId)) {
             throw new BadRequestException("You're already following this user");
         }
 
-        workstation.getFollowingUsers().add(user);
-        workstationRepository.save(workstation);
+        workstationRepository.followUser(workstationId, userId);
     }
 
     private void unfollowUser(Long workstationId, Long userId) {
-        Workstation workstation = workstationRepository.findById(workstationId)
-                .orElseThrow(() -> new NotFoundException("Workstation not found"));
+        if(!workstationRepository.existsById(workstationId))
+            throw new NotFoundException("Workstation not found");
 
-        User user = userRepository.findById(userId)
-                .orElseThrow(() -> new NotFoundException("User not found"));
+        if(!userRepository.existsById(userId))
+            throw new NotFoundException("User not found");
 
         if (!workstationRepository.existsByIdAndFollowingUsers_Id(workstationId, userId)) {
             throw new BadRequestException("You're not following this user");
         }
 
-        workstation.getFollowingUsers().remove(user);
-        workstationRepository.save(workstation);
+        workstationRepository.unfollowUser(workstationId, userId);
     }
 
     private void unfollowWorkstation(Long workstationId, Long unfollowId) {
         if (workstationId.equals(unfollowId))
             throw new BadRequestException("You can't unfollow the same workstation");
 
-        Workstation workstation = workstationRepository.findById(workstationId)
-                .orElseThrow(() -> new NotFoundException("Workstation not found"));
+        if(!workstationRepository.existsById(workstationId))
+            throw new NotFoundException("Workstation not found");
 
-        Workstation followingWorkstation = workstationRepository.findById(unfollowId)
-                .orElseThrow(() -> new NotFoundException("Following workstation not found"));
+        if(!workstationRepository.existsById(unfollowId))
+            throw new NotFoundException("Following workstation not found");
 
         if (!workstationRepository.existsByIdAndFollowingWorkstations_Id(workstationId, unfollowId))
             throw new BadRequestException("You're not following this workstation");
 
-        workstation.getFollowingWorkstations().remove(followingWorkstation);
-        workstationRepository.save(workstation);
+        workstationRepository.unfollowWorkstation(workstationId, unfollowId);
     }
 
     public GetMembersDTO getMembers(Long workstationId, Pageable pageable) {

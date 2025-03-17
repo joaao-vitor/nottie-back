@@ -18,6 +18,27 @@ public interface WorkstationRepository extends JpaRepository<Workstation, Long> 
 
     Optional<Workstation> getWorkstationsById(Long id);
 
+    @Modifying
+    @Query(value = "INSERT INTO workstation_follows_user (user_followed_id, workstation_id) VALUES (:userId, :workstationId)"
+            , nativeQuery = true)
+    void followUser(@Param("workstationId") Long workstationId, @Param("userId") Long userId);
+
+    @Modifying
+    @Query(value = "INSERT INTO workstation_follows_workstation (workstation_followed_id, workstation_id) VALUES (:followId, :workstationId)",
+            nativeQuery = true)
+    void followWorkstation(@Param("workstationId") Long workstationId, @Param("followId") Long followId);
+
+    @Modifying
+    @Query(value = "DELETE FROM workstation_follows_user WHERE workstation_id = :workstationId AND user_followed_id = :userId",
+            nativeQuery = true)
+    void unfollowUser(@Param("workstationId") Long workstationId, @Param("userId") Long userId);
+
+    @Modifying
+    @Query(value = "DELETE FROM workstation_follows_workstation WHERE workstation_id = :workstationId AND workstation_followed_id = :unfollowId",
+            nativeQuery = true
+    )
+    void unfollowWorkstation(@Param("workstationId") Long workstationId, @Param("unfollowId") Long unfollowId);
+
     boolean existsByIdAndLeaders_Id(Long workstationId, Long id);
 
     boolean existsByIdAndFollowingUsers_Id(Long workstationId, Long userId);
@@ -50,7 +71,6 @@ public interface WorkstationRepository extends JpaRepository<Workstation, Long> 
     @Query(value = "DELETE FROM workstation_leader w WHERE w.user_id = :leaderId AND w.workstation_id = :workstationId",
             nativeQuery = true)
     void removeLeader(@Param("workstationId") Long workstationId, @Param("leaderId") Long leaderId);
-
 
     boolean existsByUsername(String username);
 }
