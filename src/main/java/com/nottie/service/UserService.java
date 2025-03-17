@@ -1,8 +1,11 @@
 package com.nottie.service;
 
+import com.nottie.dto.request.user.EditUserDTO;
 import com.nottie.dto.request.user.UserSummaryDTO;
+import com.nottie.dto.response.user.EditedUserDTO;
 import com.nottie.exception.BadRequestException;
 import com.nottie.exception.NotFoundException;
+import com.nottie.exception.UnauthorizedException;
 import com.nottie.mapper.UserMapper;
 import com.nottie.model.User;
 import com.nottie.repository.UserRepository;
@@ -24,6 +27,23 @@ public class UserService {
         this.userRepository = userRepository;
         this.authUtil = authUtil;
         this.workstationRepository = workstationRepository;
+    }
+
+    @Transactional
+    public EditedUserDTO updateUser(Long id, EditUserDTO editUserDTO) {
+        User userAuthenticated = authUtil.getAuthenticatedUser();
+
+        if (!userAuthenticated.getId().equals(id))
+            throw new UnauthorizedException("You are not authorized to update this User");
+
+        if (userRepository.existsByUsername(editUserDTO.username()) && !userAuthenticated.getUsername().equals(editUserDTO.username()))
+            throw new BadRequestException("Username already exists");
+
+        userAuthenticated.setUsername(editUserDTO.username());
+        userAuthenticated.setName(editUserDTO.name());
+        userRepository.save(userAuthenticated);
+
+        return UserMapper.INSTANCE.userToEditedUserDTO(userAuthenticated);
     }
 
     @Transactional

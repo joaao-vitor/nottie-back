@@ -1,8 +1,11 @@
 package com.nottie.controller;
 
+import com.nottie.dto.request.user.EditUserDTO;
 import com.nottie.dto.request.user.UserSummaryDTO;
+import com.nottie.dto.response.user.EditedUserDTO;
 import com.nottie.service.UserService;
 import com.nottie.util.ResponseUtil;
+import jakarta.validation.Valid;
 import org.springframework.http.HttpStatus;
 import org.springframework.http.ResponseEntity;
 import org.springframework.web.bind.annotation.*;
@@ -15,6 +18,12 @@ public class UserController {
 
     public UserController(UserService userService) {
         this.userService = userService;
+    }
+
+    @PutMapping("/{id}")
+    public ResponseEntity<?> updateUser(@PathVariable Long id, @RequestBody @Valid EditUserDTO editUserDTO) {
+        EditedUserDTO editedUserDTO = userService.updateUser(id, editUserDTO);
+        return ResponseUtil.buildSuccessResponse(editedUserDTO, "User updated successfully", HttpStatus.OK);
     }
 
     @PostMapping("/follow/user/{id}")
