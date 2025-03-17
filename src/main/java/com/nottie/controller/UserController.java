@@ -26,6 +26,12 @@ public class UserController {
         return ResponseUtil.buildSuccessResponse(editedUserDTO, "User updated successfully", HttpStatus.OK);
     }
 
+    @DeleteMapping("/{id}")
+    public ResponseEntity<?> deleteUser(@PathVariable Long id) {
+        userService.deleteUser(id);
+        return ResponseUtil.buildSuccessResponse("User deleted successfully", HttpStatus.OK);
+    }
+
     @PostMapping("/follow/user/{id}")
     public ResponseEntity<?> followUser(@PathVariable Long id) {
         userService.follow(id, UserService.FollowType.USER);

@@ -29,6 +29,6 @@ ALTER TABLE user_follow_workstation
     ADD CONSTRAINT fk_usefolwor_on_user FOREIGN KEY (user_id) REFERENCES users (id);
 
 ALTER TABLE user_follow_workstation
-    ADD CONSTRAINT fk_usefolwor_on_workstation FOREIGN KEY (workstation_id) REFERENCES workstation (id);
+    ADD CONSTRAINT fk_usefolwor_on_workstation FOREIGN KEY (workstation_id) REFERENCES workstation (id) ON DELETE CASCADE;
 
 DROP TABLE user_follow CASCADE;

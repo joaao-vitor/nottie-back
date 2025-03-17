@@ -27,7 +27,7 @@ public class Workstation {
     @Column(name = "profile_img", nullable = false)
     private String profileImg = "https://cdn.pixabay.com/photo/2015/10/05/22/37/blank-profile-picture-973460_640.png";
 
-    @ManyToMany
+    @ManyToMany(cascade = {CascadeType.DETACH, CascadeType.MERGE, CascadeType.PERSIST, CascadeType.REFRESH})
     @JoinTable(
             name = "workstation_follows_user",
             joinColumns = {@JoinColumn(name = "workstation_id")},
@@ -36,10 +36,10 @@ public class Workstation {
     @JsonIgnore
     private Set<User> followingUsers;
 
-    @ManyToMany(mappedBy = "followingWorkstations")
+    @ManyToMany(mappedBy = "followingWorkstations", cascade = {CascadeType.DETACH, CascadeType.MERGE, CascadeType.PERSIST, CascadeType.REFRESH})
     private Set<User> followersUsers;
 
-    @ManyToMany
+    @ManyToMany(cascade = {CascadeType.DETACH, CascadeType.MERGE, CascadeType.PERSIST, CascadeType.REFRESH})
     @JoinTable(
             name = "workstation_follows_workstation",
             joinColumns = {@JoinColumn(name = "workstation_id")},
@@ -48,17 +48,17 @@ public class Workstation {
     @JsonIgnore
     private Set<Workstation> followingWorkstations;
 
-    @ManyToMany(mappedBy = "followingWorkstations")
+    @ManyToMany(mappedBy = "followingWorkstations", cascade = {CascadeType.DETACH, CascadeType.MERGE, CascadeType.PERSIST, CascadeType.REFRESH})
     private Set<Workstation> followersWorkstations;
 
-    @ManyToMany
+    @ManyToMany(cascade = {CascadeType.DETACH, CascadeType.MERGE, CascadeType.PERSIST, CascadeType.REFRESH})
     @JoinTable(
             name = "workstation_member",
             joinColumns = {@JoinColumn(name = "workstation_id")},
             inverseJoinColumns = {@JoinColumn(name = "user_id")}
     )
     private Set<User> members;
-    @ManyToMany
+    @ManyToMany(cascade = {CascadeType.DETACH, CascadeType.MERGE, CascadeType.PERSIST, CascadeType.REFRESH})
     @JoinTable(
             name = "workstation_leader",
             joinColumns = {@JoinColumn(name = "workstation_id")},

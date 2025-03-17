@@ -46,6 +46,13 @@ public class UserService {
         return UserMapper.INSTANCE.userToEditedUserDTO(userAuthenticated);
     }
 
+    public void deleteUser(Long id) {
+        User userAuthenticated = authUtil.getAuthenticatedUser();
+        if(!userAuthenticated.getId().equals(id))
+            throw new UnauthorizedException("You are not authorized to delete this User");
+        userRepository.delete(userAuthenticated);
+    }
+
     @Transactional
     public void follow(Long id, FollowType type) {
         if(type.equals(FollowType.USER)) {
