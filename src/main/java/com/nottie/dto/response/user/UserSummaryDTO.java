@@ -1,4 +1,4 @@
-package com.nottie.dto.request.user;
+package com.nottie.dto.response.user;
 
 import java.util.Objects;
 

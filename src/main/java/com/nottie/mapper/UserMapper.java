@@ -1,7 +1,7 @@
 package com.nottie.mapper;
 
 import com.nottie.dto.request.auth.CreateUserDTO;
-import com.nottie.dto.request.user.UserSummaryDTO;
+import com.nottie.dto.response.user.UserSummaryDTO;
 import com.nottie.dto.request.workstation.WorkstationLeaderDTO;
 import com.nottie.dto.response.auth.CreatedUserDTO;
 import com.nottie.dto.response.auth.UserLoggedDTO;

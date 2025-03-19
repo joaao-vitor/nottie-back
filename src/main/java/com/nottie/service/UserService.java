@@ -1,7 +1,7 @@
 package com.nottie.service;
 
 import com.nottie.dto.request.user.EditUserDTO;
-import com.nottie.dto.request.user.UserSummaryDTO;
+import com.nottie.dto.response.user.UserSummaryDTO;
 import com.nottie.dto.response.user.EditedUserDTO;
 import com.nottie.dto.response.workstation.ProfileImgDTO;
 import com.nottie.exception.BadRequestException;
