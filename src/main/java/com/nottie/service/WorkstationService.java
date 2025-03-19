@@ -1,5 +1,6 @@
 package com.nottie.service;
 
+import com.nottie.dto.response.user.SummaryDTO;
 import com.nottie.dto.request.workstation.CreateWorkstationDTO;
 import com.nottie.dto.request.workstation.EditWorkstationDTO;
 import com.nottie.dto.request.workstation.GetLeadersDTO;
@@ -31,6 +32,7 @@ public class WorkstationService {
     private final CloudinaryService cloudinaryService;
 
 
+
     public enum FollowType {USER, WORKSTATION}
 
     public WorkstationService(WorkstationRepository workstationRepository, AuthUtil authUtil, UserRepository userRepository, CloudinaryService cloudinaryService) {
@@ -38,6 +40,25 @@ public class WorkstationService {
         this.authUtil = authUtil;
         this.userRepository = userRepository;
         this.cloudinaryService = cloudinaryService;
+    }
+
+    public SummaryDTO getWorkstationSummary(Long workstationId) {
+
+        Workstation workstation = workstationRepository.findById(workstationId).orElseThrow(
+                () -> new BadRequestException("Workstation not found")
+        );
+
+        SummaryDTO summaryDTO = WorkstationMapper.INSTANCE.workstationToSummaryDTO(workstation);
+
+        Long followersUserCount = workstationRepository.countFollowersUsersByWorkstationId(workstation.getId()).orElseThrow();
+        Long followersWorkstationCount = workstationRepository.countFollowersWorkstationsByWorkstationId(workstation.getId()).orElseThrow();
+        summaryDTO.setFollowersCount(followersUserCount + followersWorkstationCount);
+
+        Long followingUserCount = workstationRepository.countFollowingUsersByWorkstationId(workstation.getId()).orElseThrow();
+        Long followingWorkstationCount = workstationRepository.countFollowingWorkstationsByWorkstationId(workstation.getId()).orElseThrow();
+
+        summaryDTO.setFollowingCount(followingUserCount + followingWorkstationCount);
+        return summaryDTO;
     }
 
     @Transactional

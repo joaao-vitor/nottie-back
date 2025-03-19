@@ -3,6 +3,7 @@ package com.nottie.controller;
 import com.nottie.dto.request.workstation.CreateWorkstationDTO;
 import com.nottie.dto.request.workstation.EditWorkstationDTO;
 import com.nottie.dto.request.workstation.GetLeadersDTO;
+import com.nottie.dto.response.user.SummaryDTO;
 import com.nottie.dto.response.workstation.CreatedWorkstationDTO;
 import com.nottie.dto.response.workstation.EditedWorkstationDTO;
 import com.nottie.dto.response.workstation.GetMembersDTO;
@@ -24,6 +25,12 @@ public class WorkstationController {
 
     public WorkstationController(WorkstationService workstationService) {
         this.workstationService = workstationService;
+    }
+
+    @GetMapping("{workstationId}")
+    public ResponseEntity<?> getWorkstationSummary(@PathVariable Long workstationId) {
+        SummaryDTO workstationSummaryDTO = workstationService.getWorkstationSummary(workstationId);
+        return ResponseUtil.buildSuccessResponse(workstationSummaryDTO, "Workstation fetched successfully", HttpStatus.OK);
     }
 
     @PostMapping

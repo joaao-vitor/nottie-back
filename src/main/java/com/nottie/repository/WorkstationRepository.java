@@ -73,4 +73,17 @@ public interface WorkstationRepository extends JpaRepository<Workstation, Long> 
     void removeLeader(@Param("workstationId") Long workstationId, @Param("leaderId") Long leaderId);
 
     boolean existsByUsername(String username);
+
+    @Query("SELECT count(f) FROM Workstation w JOIN w.followersUsers f WHERE w.id = :workstationId")
+    Optional<Long> countFollowersUsersByWorkstationId(@Param("workstationId") Long workstationId);
+
+    @Query("SELECT count(f) FROM Workstation w JOIN w.followingUsers f WHERE w.id = :workstationId")
+    Optional<Long> countFollowingUsersByWorkstationId(@Param("workstationId") Long workstationId);
+
+    @Query("SELECT count(f) FROM Workstation w JOIN w.followingWorkstations f WHERE w.id = :workstationId")
+    Optional<Long> countFollowingWorkstationsByWorkstationId(@Param("workstationId") Long workstationId);
+
+    @Query("SELECT count(f) FROM Workstation w JOIN w.followersWorkstations f WHERE w.id = :workstationId")
+    Optional<Long> countFollowersWorkstationsByWorkstationId(@Param("workstationId") Long workstationId);
+
 }
