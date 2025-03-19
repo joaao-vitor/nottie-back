@@ -1,7 +1,7 @@
 package com.nottie.controller;
 
 import com.nottie.dto.request.user.EditUserDTO;
-import com.nottie.dto.response.user.UserSummaryDTO;
+import com.nottie.dto.response.user.SummaryDTO;
 import com.nottie.dto.response.user.EditedUserDTO;
 import com.nottie.dto.response.workstation.ProfileImgDTO;
 import com.nottie.service.UserService;
@@ -67,7 +67,7 @@ public class UserController {
 
     @GetMapping("/summary/{id}")
     public ResponseEntity<?> getUserSummary(@PathVariable Long id) {
-        UserSummaryDTO user = userService.getUserSummary(id);
+        SummaryDTO user = userService.getUserSummary(id);
         return ResponseUtil.buildSuccessResponse(user, "User summary fetched successfully", HttpStatus.OK);
     }
 }

@@ -2,7 +2,7 @@ package com.nottie.dto.response.user;
 
 import java.util.Objects;
 
-public class UserSummaryDTO {
+public class SummaryDTO {
     private String id;
     private String name;
     private String username;
@@ -10,10 +10,10 @@ public class UserSummaryDTO {
     private Long followersCount;
     private Long followingCount;
 
-    public UserSummaryDTO() {
+    public SummaryDTO() {
     }
 
-    public UserSummaryDTO(String id, String name, String username, String profileImg, Long followersCount, Long followingCount) {
+    public SummaryDTO(String id, String name, String username, String profileImg, Long followersCount, Long followingCount) {
         this.id = id;
         this.name = name;
         this.username = username;
@@ -74,7 +74,7 @@ public class UserSummaryDTO {
     public boolean equals(Object o) {
         if (this == o) return true;
         if (o == null || getClass() != o.getClass()) return false;
-        UserSummaryDTO that = (UserSummaryDTO) o;
+        SummaryDTO that = (SummaryDTO) o;
         return Objects.equals(id, that.id) && Objects.equals(name, that.name) && Objects.equals(username, that.username) && Objects.equals(profileImg, that.profileImg) && Objects.equals(followersCount, that.followersCount) && Objects.equals(followingCount, that.followingCount);
     }
 

@@ -1,7 +1,7 @@
 package com.nottie.service;
 
 import com.nottie.dto.request.user.EditUserDTO;
-import com.nottie.dto.response.user.UserSummaryDTO;
+import com.nottie.dto.response.user.SummaryDTO;
 import com.nottie.dto.response.user.EditedUserDTO;
 import com.nottie.dto.response.workstation.ProfileImgDTO;
 import com.nottie.exception.BadRequestException;
@@ -150,21 +150,21 @@ public class UserService {
         userRepository.unfollowWorkstation(userAuthenticated.getId(), workstationId);
     }
 
-    public UserSummaryDTO getUserSummary(Long id) {
+    public SummaryDTO getUserSummary(Long id) {
         User user = userRepository.getUserById(id).orElseThrow(
                 () -> new BadRequestException("User not found")
         );
 
-        UserSummaryDTO userSummaryDTO = UserMapper.INSTANCE.userToUserSummaryDTO(user);
+        SummaryDTO summaryDTO = UserMapper.INSTANCE.userToSummaryDTO(user);
 
         Long followersUserCount = userRepository.countFollowersUsersByUserId(user.getId()).orElseThrow();
         Long followersWorkstationCount = userRepository.countFollowersWorkstationsByUserId(user.getId()).orElseThrow();
-        userSummaryDTO.setFollowersCount(followersUserCount + followersWorkstationCount);
+        summaryDTO.setFollowersCount(followersUserCount + followersWorkstationCount);
 
         Long followingUserCount = userRepository.countFollowingUsersByUserId(user.getId()).orElseThrow();
         Long followingWorkstationCount = userRepository.countFollowingWorkstationsByUserId(user.getId()).orElseThrow();
 
-        userSummaryDTO.setFollowingCount(followingUserCount + followingWorkstationCount);
-        return userSummaryDTO;
+        summaryDTO.setFollowingCount(followingUserCount + followingWorkstationCount);
+        return summaryDTO;
     }
 }
