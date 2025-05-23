@@ -45,7 +45,7 @@ public class WorkstationService {
     public SummaryDTO getWorkstationSummary(Long workstationId) {
 
         Workstation workstation = workstationRepository.findById(workstationId).orElseThrow(
-                () -> new BadRequestException("Workstation not found")
+                () -> new BadRequestException("Estação de trabalho não encontrado.")
         );
 
         SummaryDTO summaryDTO = WorkstationMapper.INSTANCE.workstationToSummaryDTO(workstation);
@@ -64,14 +64,14 @@ public class WorkstationService {
     @Transactional
     public CreatedWorkstationDTO createWorkstation(CreateWorkstationDTO createWorkstationDTO) {
         if (createWorkstationDTO.name() == null || createWorkstationDTO.name().isEmpty())
-            throw new BadRequestException("Name cannot be empty");
+            throw new BadRequestException("O campo nome não pode estar em branco.");
 
         if (createWorkstationDTO.username() == null || createWorkstationDTO.username().isEmpty())
-            throw new BadRequestException("Username cannot be empty");
+            throw new BadRequestException("O campo nome de usuário não pode estar em branco.");
 
         if (userRepository.getUserByUsername(createWorkstationDTO.username()).isPresent()
                 || workstationRepository.getWorkstationsByUsername(createWorkstationDTO.username()).isPresent())
-            throw new BadRequestException("Username already exists");
+            throw new BadRequestException("Este nome de usuário já existe.");
 
         Workstation workstation = WorkstationMapper.INSTANCE.createWorkstationDTOToWorkstation(createWorkstationDTO);
 
@@ -92,10 +92,10 @@ public class WorkstationService {
     public EditedWorkstationDTO editWorkstation(Long workstationId, EditWorkstationDTO editWorkstationDTO) {
 
         Workstation workstation = workstationRepository.findById(workstationId)
-                .orElseThrow(() -> new NotFoundException("Workstation not found"));
+                .orElseThrow(() -> new NotFoundException("Estação de trabalho não encontrada."));
 
         if (workstationRepository.existsByUsername(editWorkstationDTO.username()))
-            throw new BadRequestException("Username already exists");
+            throw new BadRequestException("Nome de usuário já existente.");
 
         if (editWorkstationDTO.name() != null) {
             workstation.setName(editWorkstationDTO.name());
@@ -113,14 +113,14 @@ public class WorkstationService {
     @Transactional
     public ProfileImgDTO editWorkstationProfileImg(Long workstationId, MultipartFile profileImg) {
         Workstation workstation = workstationRepository.findById(workstationId).orElseThrow(
-                () -> new NotFoundException("Workstation not found")
+                () -> new NotFoundException("Estação de trabalho não encontrada.")
         );
 
         if(profileImg.isEmpty())
-            throw new BadRequestException("Profile image cannot be empty");
+            throw new BadRequestException("A imagem de perfil é obrigatória.");
 
         if(profileImg.getContentType() != null && !profileImg.getContentType().startsWith("image"))
-            throw new BadRequestException("Profile image must be an image");
+            throw new BadRequestException("A imagem de perfil deve ser uma imagem válida.");
 
         String folderName = "workstations/" + workstation.getId() + "/profile-img";
         String imgUrl = cloudinaryService.uploadImage(profileImg, folderName);
@@ -149,29 +149,29 @@ public class WorkstationService {
 
     private void followWorkstation(Long workstationId, Long followId) {
         if (workstationId.equals(followId))
-            throw new BadRequestException("You can't follow the same workstation");
+            throw new BadRequestException("Você não pode seguir a mesma estação de trabalho.");
 
         if(!workstationRepository.existsById(workstationId))
-            throw new NotFoundException("Workstation not found");
+            throw new NotFoundException("Estação de trabalho não encontrada.");
 
         if(!workstationRepository.existsById(followId))
-            throw new NotFoundException("Following workstation not found");
+            throw new NotFoundException("Estação de trabalho a ser seguida não encontrada.");
 
         if (workstationRepository.existsByIdAndFollowingWorkstations_Id(workstationId, followId))
-            throw new BadRequestException("You're already following this workstation");
+            throw new BadRequestException("Você já está seguindo esta estação de trabalho.");
 
         workstationRepository.followWorkstation(workstationId, followId);
     }
 
     private void followUser(Long workstationId, Long userId) {
         if(!workstationRepository.existsById(workstationId))
-            throw new NotFoundException("Workstation not found");
+            throw new NotFoundException("Estação de trabalho não encontrada.");
 
         if(!userRepository.existsById(userId))
-            throw new NotFoundException("User not found");
+            throw new NotFoundException("Usuário não encontrado.");
 
         if (workstationRepository.existsByIdAndFollowingUsers_Id(workstationId, userId)) {
-            throw new BadRequestException("You're already following this user");
+            throw new BadRequestException("Você já está seguindo este usuário.");
         }
 
         workstationRepository.followUser(workstationId, userId);
@@ -179,13 +179,13 @@ public class WorkstationService {
 
     private void unfollowUser(Long workstationId, Long userId) {
         if(!workstationRepository.existsById(workstationId))
-            throw new NotFoundException("Workstation not found");
+            throw new NotFoundException("Estação de trabalho não encontrada.");
 
         if(!userRepository.existsById(userId))
-            throw new NotFoundException("User not found");
+            throw new NotFoundException("Usuário não encontrado.");
 
         if (!workstationRepository.existsByIdAndFollowingUsers_Id(workstationId, userId)) {
-            throw new BadRequestException("You're not following this user");
+            throw new BadRequestException("Você não está seguindo este usuário.");
         }
 
         workstationRepository.unfollowUser(workstationId, userId);
@@ -193,23 +193,23 @@ public class WorkstationService {
 
     private void unfollowWorkstation(Long workstationId, Long unfollowId) {
         if (workstationId.equals(unfollowId))
-            throw new BadRequestException("You can't unfollow the same workstation");
+            throw new BadRequestException("Você não pode parar de seguir a mesma estação de trabalho.");
 
         if(!workstationRepository.existsById(workstationId))
-            throw new NotFoundException("Workstation not found");
+            throw new NotFoundException("Estação de trabalho não encontrada.");
 
         if(!workstationRepository.existsById(unfollowId))
-            throw new NotFoundException("Following workstation not found");
+            throw new NotFoundException("Estação de trabalho a ser seguida não encontrada.");
 
         if (!workstationRepository.existsByIdAndFollowingWorkstations_Id(workstationId, unfollowId))
-            throw new BadRequestException("You're not following this workstation");
+            throw new BadRequestException("Você não está seguindo esta estação de trabalho.");
 
         workstationRepository.unfollowWorkstation(workstationId, unfollowId);
     }
 
     public GetMembersDTO getMembers(Long workstationId, Pageable pageable) {
         if (!workstationRepository.existsById(workstationId))
-            throw new NotFoundException("Workstation not found");
+            throw new NotFoundException("Estação de trabalho não encontrada.");
 
         Page<WorkstationMemberDTO> usersPage = workstationRepository.findAllMembersByWorkstationId(workstationId, pageable);
 
@@ -227,7 +227,7 @@ public class WorkstationService {
 
     public GetLeadersDTO getLeaders(Long workstationId, Pageable pageable) {
         if (!workstationRepository.existsById(workstationId))
-            throw new NotFoundException("Workstation not found");
+            throw new NotFoundException("Estação de trabalho não encontrada.");
 
         Page<User> usersPage = workstationRepository.findAllLeadersByWorkstationId(workstationId, pageable);
 
@@ -248,9 +248,9 @@ public class WorkstationService {
     @Transactional
     public void addNewLeader(Long workstationId, Long leaderId) {
         if (!workstationRepository.existsById(workstationId))
-            throw new NotFoundException("Workstation not found");
+            throw new NotFoundException("Estação de trabalho não encontrada.");
         if (!userRepository.existsById(leaderId))
-            throw new NotFoundException("User not found");
+            throw new NotFoundException("Usuário não encontrado.");
 
         workstationRepository.addNewLeader(workstationId, leaderId);
     }
@@ -258,11 +258,11 @@ public class WorkstationService {
     @Transactional
     public void removeLeader(Long workstationId, Long leaderId) {
         if (!workstationRepository.existsById(workstationId))
-            throw new NotFoundException("Workstation not found");
+            throw new NotFoundException("Estação de trabalho não encontrada.");
         if (!userRepository.existsById(leaderId))
-            throw new NotFoundException("User not found");
+            throw new NotFoundException("Usuário não encontrado.");
         if (!workstationRepository.existsLeaderById(workstationId, leaderId))
-            throw new BadRequestException("This user is not a leader of this workstation");
+            throw new BadRequestException("Você não é lider desta estação de trabalho.");
 
         workstationRepository.removeLeader(workstationId, leaderId);
     }
@@ -281,7 +281,7 @@ public class WorkstationService {
 
     public boolean isCreator(Long workstationId) {
         User authenticatedUser = authUtil.getAuthenticatedUser();
-        Workstation workstation = workstationRepository.findById(workstationId).orElseThrow(() -> new NotFoundException("Workstation not found"));
+        Workstation workstation = workstationRepository.findById(workstationId).orElseThrow(() -> new NotFoundException("Estação de trabalho não encontrada."));
 
         return workstation.getCreator().equals(authenticatedUser);
     }

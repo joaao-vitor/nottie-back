@@ -38,10 +38,10 @@ public class UserService {
         User userAuthenticated = authUtil.getAuthenticatedUser();
 
         if (!userAuthenticated.getId().equals(id))
-            throw new UnauthorizedException("You are not authorized to update this User");
+            throw new UnauthorizedException("Você não é autorizado a atualizar esse usário");
 
         if (userRepository.existsByUsername(editUserDTO.username()) && !userAuthenticated.getUsername().equals(editUserDTO.username()))
-            throw new BadRequestException("Username already exists");
+            throw new BadRequestException("Nome de usuário já existe");
 
         userAuthenticated.setUsername(editUserDTO.username());
         userAuthenticated.setName(editUserDTO.name());
@@ -53,13 +53,13 @@ public class UserService {
     public ProfileImgDTO editUserProfileImg(Long userId, MultipartFile profileImg) {
         User userAuthenticated = authUtil.getAuthenticatedUser();
         if (!userAuthenticated.getId().equals(userId))
-            throw new UnauthorizedException("You are not authorized to update this User");
+            throw new UnauthorizedException("Você não é autorizado a editar esse usuário");
 
         if(profileImg.isEmpty())
-            throw new BadRequestException("Profile image cannot be empty");
+            throw new BadRequestException("A imagem de perfil é obrigatória");
 
         if(profileImg.getContentType() != null && !profileImg.getContentType().startsWith("image"))
-            throw new BadRequestException("Profile image must be an image");
+            throw new BadRequestException("A imagem de perfil deve ser uma imagem válida");
 
         String folderName = "users/" + userAuthenticated.getId() + "/profile-img";
         String imgUrl = cloudinaryService.uploadImage(profileImg, folderName);
@@ -71,7 +71,7 @@ public class UserService {
     public void deleteUser(Long id) {
         User userAuthenticated = authUtil.getAuthenticatedUser();
         if(!userAuthenticated.getId().equals(id))
-            throw new UnauthorizedException("You are not authorized to delete this User");
+            throw new UnauthorizedException("Você não é autorizado a excluir esse usuário.");
         userRepository.delete(userAuthenticated);
     }
 
@@ -97,14 +97,14 @@ public class UserService {
         User userAuthenticated = authUtil.getAuthenticatedUser();
 
         if(userAuthenticated.getId().equals(followId))
-            throw new BadRequestException("You can not follow yourself");
+            throw new BadRequestException("Você não pode seguir você mesmo.");
 
         if(!userRepository.existsById(followId))
-            throw new NotFoundException("User not found");
+            throw new NotFoundException("Usuário não encontrado.");
 
         System.out.println(userRepository.existsByIdAndFollowingUsers_Id(userAuthenticated.getId(), followId));
         if(userRepository.existsByIdAndFollowingUsers_Id(userAuthenticated.getId(), followId))
-            throw new BadRequestException("You're already following this user");
+            throw new BadRequestException("Você já está seguindo esse usuário");
 
         userRepository.followUser(userAuthenticated.getId(), followId);
     }
@@ -114,14 +114,14 @@ public class UserService {
         User userAuthenticated = authUtil.getAuthenticatedUser();
 
         if(userAuthenticated.getId().equals(unfollowId))
-            throw new BadRequestException("You can not unfollow yourself");
+            throw new BadRequestException("Você não pode parar de seguir você mesmo.");
 
 
         if(!userRepository.existsById(unfollowId))
-            throw new NotFoundException("User not found");
+            throw new NotFoundException("Usuário não encontrado");
 
         if(!userRepository.existsByIdAndFollowingUsers_Id(userAuthenticated.getId(), unfollowId))
-            throw new BadRequestException("You're not following this user");
+            throw new BadRequestException("Você não está seguindo esse usuário.");
 
         userRepository.unfollowUser(userAuthenticated.getId(), unfollowId);
     }
@@ -130,10 +130,10 @@ public class UserService {
         User userAuthenticated = authUtil.getAuthenticatedUser();
 
         if(!workstationRepository.existsById(workstationId))
-            throw new NotFoundException("Workstation not found");
+            throw new NotFoundException("Estação de trabalho não encontrada.");
 
         if(userRepository.existsByIdAndFollowingWorkstations_Id(userAuthenticated.getId(), workstationId))
-            throw new NotFoundException("You're already following workstation");
+            throw new NotFoundException("Você já está seguindo esta estação de trabalho.");
 
         userRepository.followWorkstation(userAuthenticated.getId(), workstationId);
     }
@@ -142,17 +142,17 @@ public class UserService {
         User userAuthenticated = authUtil.getAuthenticatedUser();
 
         if(!workstationRepository.existsById(workstationId))
-            throw new NotFoundException("Workstation not found");
+            throw new NotFoundException("Estação de trabalho não encontrada.");
 
         if(!userRepository.existsByIdAndFollowingWorkstations_Id(userAuthenticated.getId(), workstationId))
-            throw new NotFoundException("You're not following workstation");
+            throw new NotFoundException("Você não está seguindo esta estação de trabalho.");
 
         userRepository.unfollowWorkstation(userAuthenticated.getId(), workstationId);
     }
 
     public SummaryDTO getUserSummary(Long id) {
         User user = userRepository.getUserById(id).orElseThrow(
-                () -> new BadRequestException("User not found")
+                () -> new BadRequestException("Usuário não encontrado.")
         );
 
         SummaryDTO summaryDTO = UserMapper.INSTANCE.userToSummaryDTO(user);

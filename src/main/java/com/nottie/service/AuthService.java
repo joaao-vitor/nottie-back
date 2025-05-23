@@ -55,13 +55,13 @@ public class AuthService {
         logger.info("Creating user {}", createUserDTO.username());
 
         if (!createUserDTO.password().equals(createUserDTO.confirmPassword()))
-            throw new BadRequestException("Passwords don't match");
+            throw new BadRequestException("As senhas não combinam");
 
         if(userRepository.findByEmailIgnoreCase(createUserDTO.email()).isPresent())
-            throw new BadRequestException("Email already exists");
+            throw new BadRequestException("E-mail já existente");
 
         if(userRepository.findByUsernameIgnoreCase(createUserDTO.username()).isPresent())
-            throw new BadRequestException("Username already exists");
+            throw new BadRequestException("Nome de usuário já existente");
 
         User user = UserMapper.INSTANCE.createUserDTOToUser(createUserDTO);
         user.setPassword(passwordEncoder.encode(user.getPassword()));
@@ -93,12 +93,12 @@ public class AuthService {
 
     public RefreshTokenResponseDTO refreshToken(RefreshTokenRequestDTO refreshTokenRequestDTO) {
         if(!jwtService.validateToken(refreshTokenRequestDTO.refreshToken()))
-            throw new BadCredentialsException("Invalid refresh token");
+            throw new BadCredentialsException("Refresh token inválido");
 
         String email = jwtService.extractEmailFromToken(refreshTokenRequestDTO.refreshToken());
         UserDetail userDetail = userDetailRepository.findByEmail(email).orElse(null);
         if(userDetail == null || !userDetail.isEnabled() || userDetail.getUser() == null)
-            throw new BadCredentialsException("Invalid refresh token");
+            throw new BadCredentialsException("Refresh token inválido");
 
 
         var authentication = new UsernamePasswordAuthenticationToken(userDetail, null, userDetail.getAuthorities());
@@ -109,12 +109,12 @@ public class AuthService {
     }
 
     private void sendVerificationEmail(String email, String token) {
-        String link = "<a href=\"" + verificationLink + "?token="+ token + "\">" + "Click here" + "</a>";
+        String link = "<a href=\"" + verificationLink + "?token="+ token + "\">" + "Clique aqui" + "</a>";
 
         emailService.sendSimpleMail(email, "Welcome to Nottie!",
-                "<h1>Welcome to Nottie!</h1>" +
-                        "<h4>Verify your email address</h4>" +
-                        "<h4>Click on the link bellow</h4>" +
+                "<h1>Bem vindo ao Nottie!</h1>" +
+                        "<h4>Confirme o seu endereço de e-mail</h4>" +
+                        "<h4>Clique no link abaixo</h4>" +
                         link);
     }
 }
