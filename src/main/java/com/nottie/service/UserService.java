@@ -1,6 +1,8 @@
 package com.nottie.service;
 
 import com.nottie.dto.request.user.EditUserDTO;
+import com.nottie.dto.response.auth.LoggedDTO;
+import com.nottie.dto.response.auth.UserLoggedDTO;
 import com.nottie.dto.response.user.SummaryDTO;
 import com.nottie.dto.response.user.EditedUserDTO;
 import com.nottie.dto.response.workstation.ProfileImgDTO;
@@ -31,6 +33,12 @@ public class UserService {
         this.authUtil = authUtil;
         this.workstationRepository = workstationRepository;
         this.cloudinaryService = cloudinaryService;
+    }
+
+    public UserLoggedDTO getCurrentUser() {
+        User userAuthenticated = authUtil.getAuthenticatedUser();
+
+        return UserMapper.INSTANCE.userToUserLoggedDTO(userAuthenticated);
     }
 
     @Transactional

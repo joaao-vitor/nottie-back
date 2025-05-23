@@ -1,6 +1,8 @@
 package com.nottie.controller;
 
 import com.nottie.dto.request.user.EditUserDTO;
+import com.nottie.dto.response.auth.LoggedDTO;
+import com.nottie.dto.response.auth.UserLoggedDTO;
 import com.nottie.dto.response.user.SummaryDTO;
 import com.nottie.dto.response.user.EditedUserDTO;
 import com.nottie.dto.response.workstation.ProfileImgDTO;
@@ -20,6 +22,12 @@ public class UserController {
 
     public UserController(UserService userService) {
         this.userService = userService;
+    }
+
+    @GetMapping("/me")
+    public ResponseEntity<?> getCurrentUser() {
+        UserLoggedDTO loggedDTO = userService.getCurrentUser();
+        return ResponseUtil.buildSuccessResponse(loggedDTO, "User fetched successfully", HttpStatus.OK);
     }
 
     @PutMapping("/{id}")
