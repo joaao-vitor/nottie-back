@@ -37,7 +37,7 @@ public class UserController {
     }
 
     @PatchMapping("/{id}/profile-img")
-    public ResponseEntity<?> editWorkstationProfileImg(@PathVariable Long id, @RequestParam(value = "image") MultipartFile image) {
+    public ResponseEntity<?> editUserProfileImg(@PathVariable Long id, @RequestParam(value = "image") MultipartFile image) {
         ProfileImgDTO profileImgDTO = userService.editUserProfileImg(id, image);
         return ResponseUtil.buildSuccessResponse(profileImgDTO, "Profile image updated successfully", HttpStatus.OK);
     }
