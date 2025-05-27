@@ -10,6 +10,7 @@ import org.springframework.data.jpa.repository.Modifying;
 import org.springframework.data.jpa.repository.Query;
 import org.springframework.data.repository.query.Param;
 
+import java.util.List;
 import java.util.Optional;
 
 public interface WorkstationRepository extends JpaRepository<Workstation, Long> {
@@ -17,6 +18,8 @@ public interface WorkstationRepository extends JpaRepository<Workstation, Long> 
     Optional<Workstation> getWorkstationsByUsername(String username);
 
     Optional<Workstation> getWorkstationsById(Long id);
+
+    Optional<List<Workstation>> getWorkstationsByMembers_Id(Long memberId);
 
     @Modifying
     @Query(value = "INSERT INTO workstation_follows_user (user_followed_id, workstation_id) VALUES (:userId, :workstationId)"
@@ -64,6 +67,11 @@ public interface WorkstationRepository extends JpaRepository<Workstation, Long> 
             nativeQuery = true)
     void addNewLeader(@Param("workstationId") Long workstationId, @Param("leaderId") Long leaderId);
 
+    @Modifying
+    @Query(value = "INSERT INTO workstation_member (user_id, workstation_id) VALUES (:memberId, :workstationId)",
+            nativeQuery = true)
+    void addNewMember(@Param("workstationId") Long workstationId, @Param("memberId") Long memberId);
+
     @Query("SELECT count(l) > 0 FROM Workstation w JOIN w.leaders l WHERE w.id = :workstationId AND l.id = :leaderId")
     boolean existsLeaderById(@Param("workstationId") Long workstationId, @Param("leaderId") Long leaderId);
 
@@ -71,6 +79,11 @@ public interface WorkstationRepository extends JpaRepository<Workstation, Long> 
     @Query(value = "DELETE FROM workstation_leader w WHERE w.user_id = :leaderId AND w.workstation_id = :workstationId",
             nativeQuery = true)
     void removeLeader(@Param("workstationId") Long workstationId, @Param("leaderId") Long leaderId);
+
+    @Modifying
+    @Query(value = "DELETE FROM workstation_member w WHERE w.user_id = :memberId AND w.workstation_id = :workstationId",
+            nativeQuery = true)
+    void removeMember(@Param("workstationId") Long workstationId, @Param("memberId") Long memberId);
 
     boolean existsByUsername(String username);
 

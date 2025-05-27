@@ -4,10 +4,7 @@ import com.nottie.dto.request.workstation.CreateWorkstationDTO;
 import com.nottie.dto.request.workstation.EditWorkstationDTO;
 import com.nottie.dto.request.workstation.GetLeadersDTO;
 import com.nottie.dto.response.user.SummaryDTO;
-import com.nottie.dto.response.workstation.CreatedWorkstationDTO;
-import com.nottie.dto.response.workstation.EditedWorkstationDTO;
-import com.nottie.dto.response.workstation.GetMembersDTO;
-import com.nottie.dto.response.workstation.ProfileImgDTO;
+import com.nottie.dto.response.workstation.*;
 import com.nottie.service.WorkstationService;
 import com.nottie.util.ResponseUtil;
 import org.springframework.data.domain.Pageable;
@@ -120,6 +117,27 @@ public class WorkstationController {
         workstationService.removeLeader(workstationId, leaderId);
 
         return ResponseUtil.buildSuccessResponse("Leader removed successfully", HttpStatus.OK);
+    }
+    @PatchMapping("/{workstationId}/add/member/{memberId}")
+    @PreAuthorize("@workstationService.isLeader(#workstationId)")
+    public ResponseEntity<?> addNewMember(@PathVariable Long workstationId, @PathVariable Long memberId) {
+        workstationService.addNewMember(workstationId, memberId);
+        return ResponseUtil.buildSuccessResponse("Member added successfully", HttpStatus.OK);
+    }
+
+    @DeleteMapping("/{workstationId}/remove/member/{memberId}")
+    @PreAuthorize("@workstationService.isLeader(#workstationId)")
+    public ResponseEntity<?> removeMember(@PathVariable Long workstationId, @PathVariable Long memberId) {
+        workstationService.removeMember(workstationId, memberId);
+
+        return ResponseUtil.buildSuccessResponse("Member removed successfully", HttpStatus.OK);
+    }
+
+    @GetMapping("/{workstationId}/auth")
+    @PreAuthorize("@workstationService.isMember(#workstationId)")
+    public ResponseEntity<?> workstationAuth(@PathVariable Long workstationId) {
+        WorkstationAuthDTO workstationIsMember = workstationService.getWorkstationAuth(workstationId);
+        return ResponseUtil.buildSuccessResponse(workstationIsMember, "Workstation is member successfully", HttpStatus.OK);
     }
 
 }

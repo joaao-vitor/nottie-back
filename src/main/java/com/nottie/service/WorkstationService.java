@@ -1,5 +1,6 @@
 package com.nottie.service;
 
+import com.nottie.dto.response.workstation.WorkstationAuthDTO;
 import com.nottie.dto.response.user.SummaryDTO;
 import com.nottie.dto.request.workstation.CreateWorkstationDTO;
 import com.nottie.dto.request.workstation.EditWorkstationDTO;
@@ -40,6 +41,16 @@ public class WorkstationService {
         this.authUtil = authUtil;
         this.userRepository = userRepository;
         this.cloudinaryService = cloudinaryService;
+    }
+
+    public WorkstationAuthDTO getWorkstationAuth(Long workstationId) {
+        Workstation workstation = workstationRepository.findById(workstationId).orElseThrow(() -> new NotFoundException("Estação de trabalho não encontrada"));
+
+        boolean leader = isLeader(workstationId);
+        WorkstationAuthDTO workstationAuthDTO = WorkstationMapper.INSTANCE.workstationToWorkstationAuthDTO(workstation);
+        workstationAuthDTO.setIsLeader(leader);
+
+        return workstationAuthDTO;
     }
 
     public SummaryDTO getWorkstationSummary(Long workstationId) {
@@ -251,6 +262,14 @@ public class WorkstationService {
             throw new NotFoundException("Estação de trabalho não encontrada.");
         if (!userRepository.existsById(leaderId))
             throw new NotFoundException("Usuário não encontrado.");
+        if (workstationRepository.existsByIdAndLeaders_Id(workstationId, leaderId))
+            throw new BadRequestException("O usuário já é líder");
+
+        boolean isMember = workstationRepository.existsByIdAndMembers_Id(workstationId, leaderId);
+
+        if(isMember) {
+            workstationRepository.removeMember(workstationId, leaderId);
+        }
 
         workstationRepository.addNewLeader(workstationId, leaderId);
     }
@@ -261,10 +280,41 @@ public class WorkstationService {
             throw new NotFoundException("Estação de trabalho não encontrada.");
         if (!userRepository.existsById(leaderId))
             throw new NotFoundException("Usuário não encontrado.");
-        if (!workstationRepository.existsLeaderById(workstationId, leaderId))
-            throw new BadRequestException("Você não é lider desta estação de trabalho.");
+        if (!workstationRepository.existsByIdAndLeaders_Id(workstationId, leaderId))
+            throw new BadRequestException("O usuário não é líder");
 
         workstationRepository.removeLeader(workstationId, leaderId);
+    }
+
+    @Transactional
+    public void addNewMember(Long workstationId, Long memberId) {
+
+        if (!workstationRepository.existsById(workstationId))
+            throw new NotFoundException("Estação de trabalho não encontrada.");
+        if (!userRepository.existsById(memberId))
+            throw new NotFoundException("Usuário não encontrado.");
+        if (workstationRepository.existsByIdAndMembers_Id(workstationId, memberId))
+            throw new BadRequestException("O usuário já é membro");
+
+        boolean isLeader = workstationRepository.existsByIdAndLeaders_Id(workstationId, memberId);
+
+        if(isLeader) {
+            throw new BadRequestException("Você não pode adicionar um líder.");
+        }
+
+        workstationRepository.addNewMember(workstationId, memberId);
+    }
+
+    @Transactional
+    public void removeMember(Long workstationId, Long memberId) {
+        if (!workstationRepository.existsById(workstationId))
+            throw new NotFoundException("Estação de trabalho não encontrada.");
+        if (!userRepository.existsById(memberId))
+            throw new NotFoundException("Usuário não encontrado.");
+        if (!workstationRepository.existsByIdAndMembers_Id(workstationId, memberId))
+            throw new BadRequestException("O usuário não é membro");
+
+        workstationRepository.removeMember(workstationId, memberId);
     }
 
     public boolean isMember(Long workstationId) {

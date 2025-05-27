@@ -1,8 +1,8 @@
 package com.nottie.service;
 
 import com.nottie.dto.request.user.EditUserDTO;
-import com.nottie.dto.response.auth.LoggedDTO;
-import com.nottie.dto.response.auth.UserLoggedDTO;
+import com.nottie.dto.response.user.AuthenticatedUserDTO;
+import com.nottie.dto.response.workstation.WorkstationAuthDTO;
 import com.nottie.dto.response.user.SummaryDTO;
 import com.nottie.dto.response.user.EditedUserDTO;
 import com.nottie.dto.response.workstation.ProfileImgDTO;
@@ -10,13 +10,17 @@ import com.nottie.exception.BadRequestException;
 import com.nottie.exception.NotFoundException;
 import com.nottie.exception.UnauthorizedException;
 import com.nottie.mapper.UserMapper;
+import com.nottie.mapper.WorkstationMapper;
 import com.nottie.model.User;
+import com.nottie.model.Workstation;
 import com.nottie.repository.UserRepository;
 import com.nottie.repository.WorkstationRepository;
 import com.nottie.util.AuthUtil;
 import jakarta.transaction.Transactional;
 import org.springframework.stereotype.Service;
 import org.springframework.web.multipart.MultipartFile;
+
+import java.util.List;
 
 @Service
 public class UserService {
@@ -35,10 +39,20 @@ public class UserService {
         this.cloudinaryService = cloudinaryService;
     }
 
-    public UserLoggedDTO getCurrentUser() {
+    public AuthenticatedUserDTO getCurrentUser() {
         User userAuthenticated = authUtil.getAuthenticatedUser();
 
-        return UserMapper.INSTANCE.userToUserLoggedDTO(userAuthenticated);
+        return UserMapper.INSTANCE.userToAuthenticatedUserDTO(userAuthenticated);
+    }
+
+
+    public List<WorkstationAuthDTO> getAuthenticatedUserWorkstations() {
+        User userAuthenticated = authUtil.getAuthenticatedUser();
+
+        List<Workstation> workstations = workstationRepository.getWorkstationsByMembers_Id(userAuthenticated.getId())
+                .orElseThrow(() -> new BadRequestException("User not logged in"));
+
+        return WorkstationMapper.INSTANCE.workstationsToWorkstationAuthDTO(workstations);
     }
 
     @Transactional

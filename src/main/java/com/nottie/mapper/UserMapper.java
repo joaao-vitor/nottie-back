@@ -1,6 +1,7 @@
 package com.nottie.mapper;
 
 import com.nottie.dto.request.auth.CreateUserDTO;
+import com.nottie.dto.response.user.AuthenticatedUserDTO;
 import com.nottie.dto.response.user.SummaryDTO;
 import com.nottie.dto.request.workstation.WorkstationLeaderDTO;
 import com.nottie.dto.response.auth.CreatedUserDTO;
@@ -36,4 +37,6 @@ public interface UserMapper {
 
     // Update User
     EditedUserDTO userToEditedUserDTO(User userAuthenticated);
+
+    AuthenticatedUserDTO userToAuthenticatedUserDTO(User userAuthenticated);
 }

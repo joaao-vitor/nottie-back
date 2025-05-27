@@ -1,8 +1,7 @@
 package com.nottie.controller;
 
 import com.nottie.dto.request.user.EditUserDTO;
-import com.nottie.dto.response.auth.LoggedDTO;
-import com.nottie.dto.response.auth.UserLoggedDTO;
+import com.nottie.dto.response.user.AuthenticatedUserDTO;
 import com.nottie.dto.response.user.SummaryDTO;
 import com.nottie.dto.response.user.EditedUserDTO;
 import com.nottie.dto.response.workstation.ProfileImgDTO;
@@ -13,6 +12,8 @@ import org.springframework.http.HttpStatus;
 import org.springframework.http.ResponseEntity;
 import org.springframework.web.bind.annotation.*;
 import org.springframework.web.multipart.MultipartFile;
+
+import java.util.List;
 
 @RestController
 @RequestMapping(value = "/user")
@@ -26,10 +27,16 @@ public class UserController {
 
     @GetMapping("/me")
     public ResponseEntity<?> getCurrentUser() {
-        UserLoggedDTO loggedDTO = userService.getCurrentUser();
+        AuthenticatedUserDTO loggedDTO = userService.getCurrentUser();
         return ResponseUtil.buildSuccessResponse(loggedDTO, "User fetched successfully", HttpStatus.OK);
     }
 
+    @GetMapping("/me/workstations")
+    public ResponseEntity<?> getAuthenticatedUserWorkstations() {
+        List<?> workstations = userService.getAuthenticatedUserWorkstations();
+
+        return ResponseUtil.buildSuccessResponse(workstations, "User's workstations fetched successfully", HttpStatus.OK);
+    }
     @PutMapping("/{id}")
     public ResponseEntity<?> updateUser(@PathVariable Long id, @RequestBody @Valid EditUserDTO editUserDTO) {
         EditedUserDTO editedUserDTO = userService.updateUser(id, editUserDTO);
