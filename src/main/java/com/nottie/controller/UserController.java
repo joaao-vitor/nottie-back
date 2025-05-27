@@ -45,21 +45,21 @@ public class UserController {
         return ResponseUtil.buildSuccessResponse("Password changed successfully", HttpStatus.OK);
     }
 
-    @PutMapping("/{id}")
-    public ResponseEntity<?> updateUser(@PathVariable Long id, @RequestBody @Valid EditUserDTO editUserDTO) {
-        EditedUserDTO editedUserDTO = userService.updateUser(id, editUserDTO);
+    @PutMapping("/me")
+    public ResponseEntity<?> updateUser(@RequestBody @Valid EditUserDTO editUserDTO) {
+        EditedUserDTO editedUserDTO = userService.updateUser(editUserDTO);
         return ResponseUtil.buildSuccessResponse(editedUserDTO, "User updated successfully", HttpStatus.OK);
     }
 
-    @PatchMapping("/{id}/profile-img")
-    public ResponseEntity<?> editUserProfileImg(@PathVariable Long id, @RequestParam(value = "image") MultipartFile image) {
-        ProfileImgDTO profileImgDTO = userService.editUserProfileImg(id, image);
+    @PatchMapping("/me/profile-img")
+    public ResponseEntity<?> editUserProfileImg( @RequestParam(value = "image") MultipartFile image) {
+        ProfileImgDTO profileImgDTO = userService.editUserProfileImg(image);
         return ResponseUtil.buildSuccessResponse(profileImgDTO, "Profile image updated successfully", HttpStatus.OK);
     }
 
-    @DeleteMapping("/{id}")
-    public ResponseEntity<?> deleteUser(@PathVariable Long id) {
-        userService.deleteUser(id);
+    @DeleteMapping("/me")
+    public ResponseEntity<?> deleteUser() {
+        userService.deleteUser();
         return ResponseUtil.buildSuccessResponse("User deleted successfully", HttpStatus.OK);
     }
 

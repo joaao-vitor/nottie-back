@@ -62,11 +62,8 @@ public class UserService {
     }
 
     @Transactional
-    public EditedUserDTO updateUser(Long id, EditUserDTO editUserDTO) {
+    public EditedUserDTO updateUser(EditUserDTO editUserDTO) {
         User userAuthenticated = authUtil.getAuthenticatedUser();
-
-        if (!userAuthenticated.getId().equals(id))
-            throw new UnauthorizedException("Você não é autorizado a atualizar esse usário");
 
         if (userRepository.existsByUsername(editUserDTO.username()) && !userAuthenticated.getUsername().equals(editUserDTO.username()))
             throw new BadRequestException("Nome de usuário já existe");
@@ -92,10 +89,8 @@ public class UserService {
     }
 
     @Transactional
-    public ProfileImgDTO editUserProfileImg(Long userId, MultipartFile profileImg) {
+    public ProfileImgDTO editUserProfileImg(MultipartFile profileImg) {
         User userAuthenticated = authUtil.getAuthenticatedUser();
-        if (!userAuthenticated.getId().equals(userId))
-            throw new UnauthorizedException("Você não é autorizado a editar esse usuário");
 
         if(profileImg.isEmpty())
             throw new BadRequestException("A imagem de perfil é obrigatória");
@@ -110,10 +105,9 @@ public class UserService {
         return new ProfileImgDTO(userAuthenticated.getProfileImg());
     }
 
-    public void deleteUser(Long id) {
+    public void deleteUser() {
         User userAuthenticated = authUtil.getAuthenticatedUser();
-        if(!userAuthenticated.getId().equals(id))
-            throw new UnauthorizedException("Você não é autorizado a excluir esse usuário.");
+
         userRepository.delete(userAuthenticated);
     }
 
