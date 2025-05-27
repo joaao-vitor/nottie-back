@@ -1,5 +1,6 @@
 package com.nottie.controller;
 
+import com.nottie.dto.request.user.ChangePasswordDTO;
 import com.nottie.dto.request.user.EditUserDTO;
 import com.nottie.dto.response.user.AuthenticatedUserDTO;
 import com.nottie.dto.response.user.SummaryDTO;
@@ -37,6 +38,13 @@ public class UserController {
 
         return ResponseUtil.buildSuccessResponse(workstations, "User's workstations fetched successfully", HttpStatus.OK);
     }
+
+    @PatchMapping("/me/change-password")
+    public ResponseEntity<?> changePassword(@RequestBody ChangePasswordDTO changePasswordDTO) {
+        userService.changePassword(changePasswordDTO);
+        return ResponseUtil.buildSuccessResponse("Password changed successfully", HttpStatus.OK);
+    }
+
     @PutMapping("/{id}")
     public ResponseEntity<?> updateUser(@PathVariable Long id, @RequestBody @Valid EditUserDTO editUserDTO) {
         EditedUserDTO editedUserDTO = userService.updateUser(id, editUserDTO);

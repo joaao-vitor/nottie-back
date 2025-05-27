@@ -1,5 +1,6 @@
 package com.nottie.service;
 
+import com.nottie.dto.request.user.ChangePasswordDTO;
 import com.nottie.dto.request.user.EditUserDTO;
 import com.nottie.dto.response.user.AuthenticatedUserDTO;
 import com.nottie.dto.response.workstation.WorkstationAuthDTO;
@@ -17,6 +18,7 @@ import com.nottie.repository.UserRepository;
 import com.nottie.repository.WorkstationRepository;
 import com.nottie.util.AuthUtil;
 import jakarta.transaction.Transactional;
+import org.springframework.security.crypto.bcrypt.BCryptPasswordEncoder;
 import org.springframework.stereotype.Service;
 import org.springframework.web.multipart.MultipartFile;
 
@@ -29,14 +31,18 @@ public class UserService {
     private final AuthUtil authUtil;
     private final WorkstationRepository workstationRepository;
     private final CloudinaryService cloudinaryService;
+    private final BCryptPasswordEncoder passwordEncoder;
+
+
 
     public enum FollowType { USER, WORKSTATION }
 
-    public UserService(UserRepository userRepository, AuthUtil authUtil, WorkstationRepository workstationRepository, CloudinaryService cloudinaryService) {
+    public UserService(UserRepository userRepository, AuthUtil authUtil, WorkstationRepository workstationRepository, CloudinaryService cloudinaryService, BCryptPasswordEncoder passwordEncoder) {
         this.userRepository = userRepository;
         this.authUtil = authUtil;
         this.workstationRepository = workstationRepository;
         this.cloudinaryService = cloudinaryService;
+        this.passwordEncoder = passwordEncoder;
     }
 
     public AuthenticatedUserDTO getCurrentUser() {
@@ -71,6 +77,20 @@ public class UserService {
 
         return UserMapper.INSTANCE.userToEditedUserDTO(userAuthenticated);
     }
+
+    @Transactional
+    public void changePassword(ChangePasswordDTO changePasswordDTO) {
+        User user = authUtil.getAuthenticatedUser();
+
+        if(!passwordEncoder.matches(changePasswordDTO.currentPassword(), user.getPassword()))
+            throw new BadRequestException("A senha atual não confere.");
+        if(!changePasswordDTO.newPassword().equals(changePasswordDTO.confirmPassword()))
+            throw new BadRequestException("As novas senhas não são iguais.");
+
+        user.setPassword(passwordEncoder.encode(changePasswordDTO.newPassword()));
+        userRepository.save(user);
+    }
+
     @Transactional
     public ProfileImgDTO editUserProfileImg(Long userId, MultipartFile profileImg) {
         User userAuthenticated = authUtil.getAuthenticatedUser();
