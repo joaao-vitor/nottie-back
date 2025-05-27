@@ -47,8 +47,10 @@ public class WorkstationService {
         Workstation workstation = workstationRepository.findById(workstationId).orElseThrow(() -> new NotFoundException("Estação de trabalho não encontrada"));
 
         boolean leader = isLeader(workstationId);
+        boolean creator = isCreator(workstationId);
         WorkstationAuthDTO workstationAuthDTO = WorkstationMapper.INSTANCE.workstationToWorkstationAuthDTO(workstation);
         workstationAuthDTO.setIsLeader(leader);
+        workstationAuthDTO.setIsCreator(creator);
 
         return workstationAuthDTO;
     }

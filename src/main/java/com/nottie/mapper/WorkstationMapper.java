@@ -27,6 +27,7 @@ public interface WorkstationMapper {
     SummaryDTO workstationToSummaryDTO(Workstation workstation);
 
     @Mapping(target = "isLeader", ignore = true)
+    @Mapping(target = "isCreator", ignore = true)
     WorkstationAuthDTO workstationToWorkstationAuthDTO(Workstation workstation);
     List<WorkstationAuthDTO> workstationsToWorkstationAuthDTO(List<Workstation> workstations);
 }
