@@ -99,4 +99,5 @@ public interface WorkstationRepository extends JpaRepository<Workstation, Long> 
     @Query("SELECT count(f) FROM Workstation w JOIN w.followersWorkstations f WHERE w.id = :workstationId")
     Optional<Long> countFollowersWorkstationsByWorkstationId(@Param("workstationId") Long workstationId);
 
+    Optional<Workstation> findByUsername(String username);
 }

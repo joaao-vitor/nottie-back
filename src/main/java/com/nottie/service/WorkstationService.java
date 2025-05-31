@@ -9,6 +9,7 @@ import com.nottie.dto.request.workstation.WorkstationLeaderDTO;
 import com.nottie.dto.response.workstation.*;
 import com.nottie.exception.BadRequestException;
 import com.nottie.exception.NotFoundException;
+import com.nottie.exception.UnauthorizedException;
 import com.nottie.mapper.UserMapper;
 import com.nottie.mapper.WorkstationMapper;
 import com.nottie.model.User;
@@ -23,6 +24,7 @@ import org.springframework.stereotype.Service;
 import org.springframework.web.multipart.MultipartFile;
 
 import java.util.List;
+import java.util.Objects;
 
 
 @Service
@@ -31,8 +33,6 @@ public class WorkstationService {
     private final AuthUtil authUtil;
     private final UserRepository userRepository;
     private final CloudinaryService cloudinaryService;
-
-
 
     public enum FollowType {USER, WORKSTATION}
 
@@ -107,7 +107,9 @@ public class WorkstationService {
         Workstation workstation = workstationRepository.findById(workstationId)
                 .orElseThrow(() -> new NotFoundException("Estação de trabalho não encontrada."));
 
-        if (workstationRepository.existsByUsername(editWorkstationDTO.username()))
+        Workstation workstationFoundByUsername = workstationRepository.findByUsername(editWorkstationDTO.username()).orElse(null);
+
+        if (workstationFoundByUsername != null && !Objects.equals(workstationFoundByUsername.getId(), workstationId))
             throw new BadRequestException("Nome de usuário já existente.");
 
         if (editWorkstationDTO.name() != null) {
@@ -221,8 +223,11 @@ public class WorkstationService {
     }
 
     public GetMembersDTO getMembers(Long workstationId, Pageable pageable) {
-        if (!workstationRepository.existsById(workstationId))
-            throw new NotFoundException("Estação de trabalho não encontrada.");
+        Workstation workstation = workstationRepository.getWorkstationsById(workstationId).orElseThrow(() -> new NotFoundException("Estação de trabalho não encontrada"));
+
+        User creator = workstation.getCreator();
+
+        WorkstationMemberDTO creatorMember = UserMapper.INSTANCE.userToWorkstationMemberDTO(creator);
 
         Page<WorkstationMemberDTO> usersPage = workstationRepository.findAllMembersByWorkstationId(workstationId, pageable);
 
@@ -230,6 +235,7 @@ public class WorkstationService {
 
         getMembersDTO.setWorkstationId(workstationId);
         getMembersDTO.setMembers(usersPage.getContent());
+        getMembersDTO.setCreator(creatorMember);
         getMembersDTO.setSize(pageable.getPageSize());
         getMembersDTO.setTotalElements(usersPage.getTotalElements());
         getMembersDTO.setTotalPages(usersPage.getTotalPages());
@@ -269,8 +275,8 @@ public class WorkstationService {
 
         boolean isMember = workstationRepository.existsByIdAndMembers_Id(workstationId, leaderId);
 
-        if(isMember) {
-            workstationRepository.removeMember(workstationId, leaderId);
+        if(!isMember) {
+            workstationRepository.addNewMember(workstationId, leaderId);
         }
 
         workstationRepository.addNewLeader(workstationId, leaderId);
@@ -310,11 +316,21 @@ public class WorkstationService {
     @Transactional
     public void removeMember(Long workstationId, Long memberId) {
         if (!workstationRepository.existsById(workstationId))
-            throw new NotFoundException("Estação de trabalho não encontrada.");
+            throw new NotFoundException("Estação de trabalho não encontrada aqui.");
         if (!userRepository.existsById(memberId))
             throw new NotFoundException("Usuário não encontrado.");
         if (!workstationRepository.existsByIdAndMembers_Id(workstationId, memberId))
             throw new BadRequestException("O usuário não é membro");
+
+        boolean isLeader = workstationRepository.existsByIdAndLeaders_Id(workstationId, memberId);
+
+        if(isLeader) {
+            if(isCreator(workstationId)){
+                workstationRepository.removeLeader(workstationId, memberId);
+            } else {
+                throw new UnauthorizedException("Você não pode excluir um líder");
+            }
+        }
 
         workstationRepository.removeMember(workstationId, memberId);
     }

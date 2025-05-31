@@ -7,6 +7,7 @@ import com.nottie.dto.request.workstation.WorkstationLeaderDTO;
 import com.nottie.dto.response.auth.CreatedUserDTO;
 import com.nottie.dto.response.auth.UserLoggedDTO;
 import com.nottie.dto.response.user.EditedUserDTO;
+import com.nottie.dto.response.workstation.WorkstationMemberDTO;
 import com.nottie.model.User;
 import org.mapstruct.Mapper;
 import org.mapstruct.Mapping;
@@ -39,4 +40,6 @@ public interface UserMapper {
     EditedUserDTO userToEditedUserDTO(User userAuthenticated);
 
     AuthenticatedUserDTO userToAuthenticatedUserDTO(User userAuthenticated);
+
+    WorkstationMemberDTO userToWorkstationMemberDTO(User creator);
 }

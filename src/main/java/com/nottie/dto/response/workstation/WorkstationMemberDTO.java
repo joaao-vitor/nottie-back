@@ -64,11 +64,11 @@ public class WorkstationMemberDTO{
         this.profileImg = profileImg;
     }
 
-    public boolean isLeader() {
+    public boolean getIsLeader() {
         return isLeader;
     }
 
-    public void setLeader(boolean leader) {
+    public void setIsLeader(boolean leader) {
         isLeader = leader;
     }
 }

@@ -8,8 +8,17 @@ import java.util.Objects;
 public class GetMembersDTO extends PageableDTO {
     private Long workstationId;
     private List<WorkstationMemberDTO> members;
+    private WorkstationMemberDTO creator;
 
     public GetMembersDTO() {
+    }
+
+    public WorkstationMemberDTO getCreator() {
+        return creator;
+    }
+
+    public void setCreator(WorkstationMemberDTO creator) {
+        this.creator = creator;
     }
 
     public GetMembersDTO(Long workstationId, List<WorkstationMemberDTO> members) {
