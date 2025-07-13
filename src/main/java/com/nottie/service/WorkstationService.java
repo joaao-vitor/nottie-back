@@ -55,11 +55,7 @@ public class WorkstationService {
         return workstationAuthDTO;
     }
 
-    public SummaryDTO getWorkstationSummary(Long workstationId) {
-
-        Workstation workstation = workstationRepository.findById(workstationId).orElseThrow(
-                () -> new BadRequestException("Estação de trabalho não encontrado.")
-        );
+    private SummaryDTO buildInitialSummary(Workstation workstation) {
 
         SummaryDTO summaryDTO = WorkstationMapper.INSTANCE.workstationToSummaryDTO(workstation);
 
@@ -69,11 +65,38 @@ public class WorkstationService {
 
         Long followingUserCount = workstationRepository.countFollowingUsersByWorkstationId(workstation.getId()).orElseThrow();
         Long followingWorkstationCount = workstationRepository.countFollowingWorkstationsByWorkstationId(workstation.getId()).orElseThrow();
-
         summaryDTO.setFollowingCount(followingUserCount + followingWorkstationCount);
+
+        summaryDTO.setSummaryType("workstation");
         return summaryDTO;
     }
 
+    public SummaryDTO getWorkstationSummaryAsUser(String username) {
+        User authenticatedUser = authUtil.getAuthenticatedUser();
+        Workstation workstation = workstationRepository.findByUsername(username).orElseThrow(
+                () -> new BadRequestException("Estação de trabalho não encontrado.")
+        );
+
+        SummaryDTO summaryDTO = buildInitialSummary(workstation);
+
+        boolean isFollowing = workstationRepository.existsByIdAndFollowersUsers_Id(workstation.getId(), authenticatedUser.getId());
+        summaryDTO.setIsFollowing(isFollowing);
+
+        return summaryDTO;
+    }
+
+    public SummaryDTO getWorkstationSummaryAsWorkstation(Long workstationId, String username) {
+        Workstation workstation = workstationRepository.findByUsername(username).orElseThrow(
+                () -> new BadRequestException("Estação de trabalho não encontrado.")
+        );
+
+        SummaryDTO summaryDTO = buildInitialSummary(workstation);
+
+        boolean isFollowing = workstationRepository.existsByIdAndFollowersWorkstations_Id(workstation.getId(), workstationId);
+        summaryDTO.setIsFollowing(isFollowing);
+
+        return summaryDTO;
+    }
     @Transactional
     public CreatedWorkstationDTO createWorkstation(CreateWorkstationDTO createWorkstationDTO) {
         if (createWorkstationDTO.name() == null || createWorkstationDTO.name().isEmpty())

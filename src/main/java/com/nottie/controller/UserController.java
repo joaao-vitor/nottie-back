@@ -3,6 +3,7 @@ package com.nottie.controller;
 import com.nottie.dto.request.user.ChangePasswordDTO;
 import com.nottie.dto.request.user.EditUserDTO;
 import com.nottie.dto.response.user.AuthenticatedUserDTO;
+import com.nottie.dto.response.user.SearchUserDTO;
 import com.nottie.dto.response.user.SummaryDTO;
 import com.nottie.dto.response.user.EditedUserDTO;
 import com.nottie.dto.response.workstation.ProfileImgDTO;
@@ -88,9 +89,21 @@ public class UserController {
         return ResponseUtil.buildSuccessResponse("Workstation unfollowed successfully", HttpStatus.OK);
     }
 
-    @GetMapping("/summary/{id}")
-    public ResponseEntity<?> getUserSummary(@PathVariable Long id) {
-        SummaryDTO user = userService.getUserSummary(id);
+    @GetMapping("/summary/{username}")
+    public ResponseEntity<?> getUserSummaryAsUser(@PathVariable String username) {
+        SummaryDTO user = userService.getUserSummaryAsUser(username);
         return ResponseUtil.buildSuccessResponse(user, "User summary fetched successfully", HttpStatus.OK);
+    }
+
+    @GetMapping("/summary/{workstationId}/{username}")
+    public ResponseEntity<?> getUserSummaryAsWorkstation(@PathVariable Long workstationId, @PathVariable String username) {
+        SummaryDTO user = userService.getUserSummaryAsWorkstation(workstationId, username);
+        return ResponseUtil.buildSuccessResponse(user, "User summary fetched successfully", HttpStatus.OK);
+    }
+
+    @GetMapping("/search/{username}")
+    public ResponseEntity<?> searchUser(@PathVariable String username) {
+        List<SearchUserDTO> searchUserDTOS = userService.searchUser(username);
+        return ResponseUtil.buildSuccessResponse(searchUserDTOS, "User searched successfully", HttpStatus.OK);
     }
 }

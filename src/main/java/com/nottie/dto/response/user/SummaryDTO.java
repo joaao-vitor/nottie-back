@@ -3,30 +3,34 @@ package com.nottie.dto.response.user;
 import java.util.Objects;
 
 public class SummaryDTO {
-    private String id;
+    private Long id;
     private String name;
     private String username;
     private String profileImg;
     private Long followersCount;
     private Long followingCount;
+    private boolean isFollowing;
+    private String summaryType;
 
-    public SummaryDTO() {
-    }
-
-    public SummaryDTO(String id, String name, String username, String profileImg, Long followersCount, Long followingCount) {
+    public SummaryDTO(Long id, String name, String username, String profileImg, Long followersCount, Long followingCount, boolean isFollowing, String summaryType) {
         this.id = id;
         this.name = name;
         this.username = username;
         this.profileImg = profileImg;
         this.followersCount = followersCount;
         this.followingCount = followingCount;
+        this.isFollowing = isFollowing;
+        this.summaryType = summaryType;
     }
 
-    public String getId() {
+    public SummaryDTO() {
+    }
+
+    public Long getId() {
         return id;
     }
 
-    public void setId(String id) {
+    public void setId(Long id) {
         this.id = id;
     }
 
@@ -70,16 +74,19 @@ public class SummaryDTO {
         this.followingCount = followingCount;
     }
 
-    @Override
-    public boolean equals(Object o) {
-        if (this == o) return true;
-        if (o == null || getClass() != o.getClass()) return false;
-        SummaryDTO that = (SummaryDTO) o;
-        return Objects.equals(id, that.id) && Objects.equals(name, that.name) && Objects.equals(username, that.username) && Objects.equals(profileImg, that.profileImg) && Objects.equals(followersCount, that.followersCount) && Objects.equals(followingCount, that.followingCount);
+    public boolean getIsFollowing() {
+        return isFollowing;
     }
 
-    @Override
-    public int hashCode() {
-        return Objects.hash(id, name, username, profileImg, followersCount, followingCount);
+    public void setIsFollowing(boolean isFollowing) {
+        this.isFollowing = isFollowing;
+    }
+
+    public String getSummaryType() {
+        return summaryType;
+    }
+
+    public void setSummaryType(String summaryType) {
+        this.summaryType = summaryType;
     }
 }

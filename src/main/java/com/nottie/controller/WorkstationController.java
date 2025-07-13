@@ -24,9 +24,15 @@ public class WorkstationController {
         this.workstationService = workstationService;
     }
 
-    @GetMapping("{workstationId}")
-    public ResponseEntity<?> getWorkstationSummary(@PathVariable Long workstationId) {
-        SummaryDTO workstationSummaryDTO = workstationService.getWorkstationSummary(workstationId);
+    @GetMapping("/summary/{username}")
+    public ResponseEntity<?> getWorkstationSummaryAsUser(@PathVariable String username) {
+        SummaryDTO workstationSummaryDTO = workstationService.getWorkstationSummaryAsUser(username);
+        return ResponseUtil.buildSuccessResponse(workstationSummaryDTO, "Workstation fetched successfully", HttpStatus.OK);
+    }
+
+    @GetMapping("/summary/{workstationId}/{username}")
+    public ResponseEntity<?> getWorkstationSummaryAsWorkstation(@PathVariable Long workstationId, @PathVariable String username) {
+        SummaryDTO workstationSummaryDTO = workstationService.getWorkstationSummaryAsWorkstation(workstationId,username);
         return ResponseUtil.buildSuccessResponse(workstationSummaryDTO, "Workstation fetched successfully", HttpStatus.OK);
     }
 

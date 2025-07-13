@@ -100,4 +100,8 @@ public interface WorkstationRepository extends JpaRepository<Workstation, Long> 
     Optional<Long> countFollowersWorkstationsByWorkstationId(@Param("workstationId") Long workstationId);
 
     Optional<Workstation> findByUsername(String username);
+
+    boolean existsByIdAndFollowersUsers_Id(Long id, Long followersUsersId);
+
+    boolean existsByIdAndFollowersWorkstations_Id(Long id, Long followersWorkstationsId);
 }

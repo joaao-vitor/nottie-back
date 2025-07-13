@@ -3,6 +3,7 @@ package com.nottie.service;
 import com.nottie.dto.request.user.ChangePasswordDTO;
 import com.nottie.dto.request.user.EditUserDTO;
 import com.nottie.dto.response.user.AuthenticatedUserDTO;
+import com.nottie.dto.response.user.SearchUserDTO;
 import com.nottie.dto.response.workstation.WorkstationAuthDTO;
 import com.nottie.dto.response.user.SummaryDTO;
 import com.nottie.dto.response.user.EditedUserDTO;
@@ -22,6 +23,7 @@ import org.springframework.security.crypto.bcrypt.BCryptPasswordEncoder;
 import org.springframework.stereotype.Service;
 import org.springframework.web.multipart.MultipartFile;
 
+import java.util.ArrayList;
 import java.util.List;
 
 @Service
@@ -32,9 +34,6 @@ public class UserService {
     private final WorkstationRepository workstationRepository;
     private final CloudinaryService cloudinaryService;
     private final BCryptPasswordEncoder passwordEncoder;
-
-
-
     public enum FollowType { USER, WORKSTATION }
 
     public UserService(UserRepository userRepository, AuthUtil authUtil, WorkstationRepository workstationRepository, CloudinaryService cloudinaryService, BCryptPasswordEncoder passwordEncoder) {
@@ -186,11 +185,7 @@ public class UserService {
         userRepository.unfollowWorkstation(userAuthenticated.getId(), workstationId);
     }
 
-    public SummaryDTO getUserSummary(Long id) {
-        User user = userRepository.getUserById(id).orElseThrow(
-                () -> new BadRequestException("Usuário não encontrado.")
-        );
-
+    private SummaryDTO buildInitialSummary(User user) {
         SummaryDTO summaryDTO = UserMapper.INSTANCE.userToSummaryDTO(user);
 
         Long followersUserCount = userRepository.countFollowersUsersByUserId(user.getId()).orElseThrow();
@@ -201,6 +196,40 @@ public class UserService {
         Long followingWorkstationCount = userRepository.countFollowingWorkstationsByUserId(user.getId()).orElseThrow();
 
         summaryDTO.setFollowingCount(followingUserCount + followingWorkstationCount);
+
+        summaryDTO.setSummaryType("user");
         return summaryDTO;
+    }
+
+    public SummaryDTO getUserSummaryAsUser(String username) {
+        User userAuthenticated = authUtil.getAuthenticatedUser();
+        User user = userRepository.getUserByUsername(username).orElseThrow(
+                () -> new BadRequestException("Usuário não encontrado.")
+        );
+
+        SummaryDTO summaryDTO = buildInitialSummary(user);
+        if(userAuthenticated.getUsername().equals(username))
+            summaryDTO.setIsFollowing(false);
+        else
+            summaryDTO.setIsFollowing(userRepository.existsByIdAndFollowingUsers_Id(userAuthenticated.getId(), user.getId()));
+
+        return summaryDTO;
+    }
+
+    public SummaryDTO getUserSummaryAsWorkstation(Long workstationId, String username) {
+        User user = userRepository.getUserByUsername(username).orElseThrow(
+                () -> new BadRequestException("Usuário não encontrado.")
+        );
+
+        SummaryDTO summaryDTO = buildInitialSummary(user);
+
+        summaryDTO.setIsFollowing(userRepository.existsByIdAndFollowersWorkstations_Id(user.getId(), workstationId));
+
+        return summaryDTO;
+    }
+
+    public List<SearchUserDTO> searchUser(String username) {
+        List<User> users = userRepository.findTop5ByUsernameContainingIgnoreCase(username);
+        return UserMapper.INSTANCE.usersToSearchUserDTOS(users);
     }
 }
