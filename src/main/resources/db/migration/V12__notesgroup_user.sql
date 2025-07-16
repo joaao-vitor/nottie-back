@@ -1,0 +1,5 @@
+ALTER TABLE notes_group
+    ADD user_id BIGINT;
+
+ALTER TABLE notes_group
+    ADD CONSTRAINT FK_NOTES_GROUP_ON_USER FOREIGN KEY (user_id) REFERENCES users (id);
