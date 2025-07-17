@@ -8,16 +8,17 @@ import java.util.List;
 public class NoteDTO {
     private Long id;
     private String title;
-    private String content;
+    private byte[] content;
     private NoteAuthorDTO creator;
     private List<NoteAuthorDTO> collaborators;
     private Instant createdAt;
     private List<NoteCategoryValueDTO> categoriesValues;
+    private List<NotesGroupCategoryDTO> categories;
 
     public NoteDTO() {
     }
 
-    public NoteDTO(Long id, String title, String content, NoteAuthorDTO creator, List<NoteAuthorDTO> collaborators, Instant createdAt, List<NoteCategoryValueDTO> categoriesValues) {
+    public NoteDTO(Long id, String title, byte[] content, NoteAuthorDTO creator, List<NoteAuthorDTO> collaborators, Instant createdAt, List<NoteCategoryValueDTO> categoriesValues, List<NotesGroupCategoryDTO> categories) {
         this.id = id;
         this.title = title;
         this.content = content;
@@ -25,6 +26,15 @@ public class NoteDTO {
         this.collaborators = collaborators;
         this.createdAt = createdAt;
         this.categoriesValues = categoriesValues;
+        this.categories = categories;
+    }
+
+    public List<NotesGroupCategoryDTO> getCategories() {
+        return categories;
+    }
+
+    public void setCategories(List<NotesGroupCategoryDTO> categories) {
+        this.categories = categories;
     }
 
     public Long getId() {
@@ -43,11 +53,11 @@ public class NoteDTO {
         this.title = title;
     }
 
-    public String getContent() {
+    public byte[] getContent() {
         return content;
     }
 
-    public void setContent(String content) {
+    public void setContent(byte[] content) {
         this.content = content;
     }
 

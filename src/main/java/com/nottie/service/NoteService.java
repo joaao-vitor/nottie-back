@@ -1,19 +1,23 @@
 package com.nottie.service;
 
-import com.nottie.dto.request.note.NewNoteDTO;
-import com.nottie.dto.request.note.EditSingleCategoryValueDTO;
+import com.nottie.dto.request.note.*;
+import com.nottie.dto.response.note.NoteCategoryValueDTO;
 import com.nottie.dto.response.note.NoteDTO;
+import com.nottie.dto.response.notesgroup.NotesGroupCategoryDTO;
 import com.nottie.exception.BadRequestException;
 import com.nottie.exception.NotFoundException;
-import com.nottie.model.CategoryType;
-import com.nottie.model.Note;
-import com.nottie.model.NoteCategoryValue;
-import com.nottie.model.NotesGroupCategory;
+import com.nottie.exception.UnauthorizedException;
+import com.nottie.mapper.NoteMapper;
+import com.nottie.mapper.NotesGroupMapper;
+import com.nottie.model.*;
 import com.nottie.repository.NoteCategoryValueRepository;
 import com.nottie.repository.NoteRepository;
 import com.nottie.repository.NotesGroupCategoryRepository;
 import com.nottie.repository.NotesGroupRepository;
+import com.nottie.util.AuthUtil;
 import org.springframework.stereotype.Service;
+
+import java.util.List;
 
 @Service
 public class NoteService {
@@ -22,34 +26,25 @@ public class NoteService {
     private final NoteRepository noteRepository;
     private final NotesGroupRepository notesGroupRepository;
     private final NoteCategoryValueRepository noteCategoryValueRepository;
+    private final WorkstationService workstationService;
+    private final AuthUtil authUtil;
 
-    public NoteService(NotesGroupCategoryRepository notesGroupCategoryRepository, NoteRepository noteRepository, NotesGroupRepository notesGroupRepository, NoteCategoryValueRepository noteCategoryValueRepository) {
+    public NoteService(NotesGroupCategoryRepository notesGroupCategoryRepository, NoteRepository noteRepository, NotesGroupRepository notesGroupRepository, NoteCategoryValueRepository noteCategoryValueRepository, WorkstationService workstationService, AuthUtil authUtil) {
         this.notesGroupCategoryRepository = notesGroupCategoryRepository;
         this.noteRepository = noteRepository;
         this.notesGroupRepository = notesGroupRepository;
         this.noteCategoryValueRepository = noteCategoryValueRepository;
+        this.workstationService = workstationService;
+        this.authUtil = authUtil;
     }
 
     public void createNote(NewNoteDTO newNoteDTO) {
         Note note = new Note();
         note.setTitle(newNoteDTO.getTitle());
         note.setNotesGroup(notesGroupRepository.findById(newNoteDTO.getNotesGroupId()).orElseThrow(() -> new BadRequestException("NotesGroup not found")));
-        note.setContent("");
+        note.setContent(null);
 
         noteRepository.save(note);
-
-        System.out.println(newNoteDTO.getCategoriesValues().toString());
-        newNoteDTO.getCategoriesValues().forEach(categoryValue -> {
-            NoteCategoryValue noteCategoryValue = new NoteCategoryValue();
-            NotesGroupCategory category = notesGroupCategoryRepository.findById(categoryValue.category().id()).orElseThrow(() -> new BadRequestException("Category not found"));
-            noteCategoryValue.setCategory(category);
-            noteCategoryValue.setTextValue(categoryValue.textValue());
-            noteCategoryValue.setCheckboxValue(categoryValue.checkboxValue());
-            noteCategoryValue.setHexColor(categoryValue.hexColor());
-            noteCategoryValue.setNote(note);
-
-            noteCategoryValueRepository.save(noteCategoryValue);
-        });
     }
 
     public void editSingleCategory(Long noteId, Long categoryValueId, EditSingleCategoryValueDTO editSingleCategoryValueDTO) {
@@ -75,6 +70,97 @@ public class NoteService {
 
     public NoteDTO getSingleNote(Long noteId) {
         Note note = noteRepository.findById(noteId).orElseThrow(() -> new NotFoundException("NotesGroupCategory not found"));
+        NoteDTO noteDTO = NoteMapper.INSTANCE.noteToNoteDTO(note);
+        List<NotesGroupCategory> categoryList = notesGroupCategoryRepository.findAllByGroup_Id(note.getNotesGroup().getId());
+        List<NotesGroupCategoryDTO> categoryDTOS = NotesGroupMapper.INSTANCE.notesGroupToNotesGroupCategoryDTO(categoryList);
+        noteDTO.setCategories(categoryDTOS);
+        return noteDTO;
+    }
 
+    public void verifyAccess(Long noteId) {
+        Note note = noteRepository.findById(noteId).orElseThrow(() -> new NotFoundException("Note not found "));
+        Workstation workstation = note.getNotesGroup().getWorkstation();
+
+        User user = note.getNotesGroup().getUser();
+        if(workstation != null) {
+            if (!workstationService.isMember(workstation.getId()))
+                throw new UnauthorizedException("Você não é membro dessa estação");
+        }else {
+            User userAuth = authUtil.getAuthenticatedUser();
+            if(!user.getId().equals(userAuth.getId())) throw new UnauthorizedException("Você não é o dono desse grupo de anotações");
+        }
+    }
+
+    public void editContent(Long noteId, byte[] content) {
+        Note note = noteRepository.findById((noteId)).orElseThrow(()-> new NotFoundException("Note not found"));
+
+        User user = authUtil.getAuthenticatedUser();
+
+        note.getCollaborators().add(user);
+
+        note.setContent(content);
+        noteRepository.save(note);
+    }
+
+    public void editNoteTitle(Long noteId, EditNoteDTO editNoteDTO) {
+        Note note = noteRepository.findById((noteId)).orElseThrow(()-> new NotFoundException("Note not found"));
+
+        note.setTitle(editNoteDTO.title());
+        noteRepository.save(note);
+    }
+
+    public NoteCategoryValueDTO addCategoryValue(Long noteId, Long categoryId, NewCategoryValueDTO noteCatValueDTO) {
+        Note note = noteRepository.findById((noteId)).orElseThrow(() -> new NotFoundException("Note not found"));
+        NotesGroupCategory notesGroupCategory = notesGroupCategoryRepository.findById(categoryId).orElseThrow(() -> new NotFoundException("Category not found"));
+
+        if(!note.getNotesGroup().getId().equals(notesGroupCategory.getGroup().getId())) {
+            throw new BadRequestException("Essa anotação não pertence a essa categoria");
+        }
+
+        NoteCategoryValue noteCategoryValue = new NoteCategoryValue();
+        noteCategoryValue.setCategory(notesGroupCategory);
+        noteCategoryValue.setNote(note);
+        noteCategoryValue.setHexColor(noteCatValueDTO.hexColor());
+        noteCategoryValue.setTextValue(noteCatValueDTO.textValue());
+        noteCategoryValue.setCheckboxValue(noteCatValueDTO.checkboxValue());
+        noteCategoryValueRepository.save(noteCategoryValue);
+
+        return NoteMapper.INSTANCE.noteCategoryValueToNoteCategoryValueDTO(noteCategoryValue);
+    }
+
+    public void deleteCategoryValue(Long noteId, Long categoryId, Long valueId) {
+        Note note = noteRepository.findById((noteId)).orElseThrow(() -> new NotFoundException("Note not found"));
+        NotesGroupCategory notesGroupCategory = notesGroupCategoryRepository.findById(categoryId).orElseThrow(() -> new NotFoundException("Category not found"));
+        NoteCategoryValue noteCategoryValue = noteCategoryValueRepository.findById((valueId)).orElseThrow(() -> new NotFoundException("CategoryValue not found"));
+
+        if(!note.getNotesGroup().getId().equals(notesGroupCategory.getGroup().getId())) {
+            throw new BadRequestException("Grupo de anotação não bate");
+        }
+
+        if(!noteCategoryValue.getNote().getId().equals(noteId)) {
+            throw new BadRequestException("Essa categoria não é desta anotação");
+        }
+        noteCategoryValueRepository.deleteById(valueId);
+    }
+
+
+    public NoteCategoryValueDTO editCategoryValue(Long noteId, Long categoryId, NewCategoryValueDTO noteCatValueDTO, Long valueId) {
+        Note note = noteRepository.findById((noteId)).orElseThrow(() -> new NotFoundException("Note not found"));
+        NotesGroupCategory notesGroupCategory = notesGroupCategoryRepository.findById(categoryId).orElseThrow(() -> new NotFoundException("Category not found"));
+        NoteCategoryValue noteCategoryValue = noteCategoryValueRepository.findById((valueId)).orElseThrow(() -> new NotFoundException("CategoryValue not found"));
+
+        if(!note.getNotesGroup().getId().equals(notesGroupCategory.getGroup().getId())) {
+            throw new BadRequestException("Grupo de anotação não bate");
+        }
+
+        if(!noteCategoryValue.getNote().getId().equals(noteId)) {
+            throw new BadRequestException("Essa categoria não é desta anotação");
+        }
+        if(noteCatValueDTO.hexColor() != null) noteCategoryValue.setHexColor(noteCatValueDTO.hexColor());
+        if(noteCatValueDTO.textValue() != null) noteCategoryValue.setTextValue(noteCatValueDTO.textValue());
+        if(noteCatValueDTO.checkboxValue() != null) noteCategoryValue.setCheckboxValue(noteCatValueDTO.checkboxValue());
+        noteCategoryValueRepository.save(noteCategoryValue);
+
+        return NoteMapper.INSTANCE.noteCategoryValueToNoteCategoryValueDTO(noteCategoryValue);
     }
 }

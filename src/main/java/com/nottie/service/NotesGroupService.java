@@ -3,23 +3,25 @@ package com.nottie.service;
 import com.nottie.dto.request.notesgroup.CreateNotesGroupCategoryDTO;
 import com.nottie.dto.request.notesgroup.CreateNotesGroupDTO;
 import com.nottie.dto.request.notesgroup.EditSingleCategoryDTO;
-import com.nottie.dto.response.note.NoteDTO;
+import com.nottie.dto.response.note.NoteCategoryValueDTO;
 import com.nottie.dto.response.notesgroup.GetAllNotesGroupDTO;
+import com.nottie.dto.response.notesgroup.NoteSummaryDTO;
 import com.nottie.dto.response.notesgroup.NotesGroupDTO;
 import com.nottie.exception.BadRequestException;
 import com.nottie.exception.NotFoundException;
 import com.nottie.exception.UnauthorizedException;
 import com.nottie.mapper.NoteMapper;
 import com.nottie.mapper.NotesGroupMapper;
+import com.nottie.mapper.UserMapper;
 import com.nottie.model.*;
-import com.nottie.repository.NoteRepository;
-import com.nottie.repository.NotesGroupCategoryRepository;
-import com.nottie.repository.NotesGroupRepository;
-import com.nottie.repository.WorkstationRepository;
+import com.nottie.repository.*;
 import com.nottie.util.AuthUtil;
+import jakarta.transaction.Transactional;
 import org.springframework.stereotype.Service;
 
+import java.util.ArrayList;
 import java.util.List;
+import java.util.Set;
 
 @Service
 public class NotesGroupService {
@@ -30,14 +32,16 @@ public class NotesGroupService {
     private final NotesGroupCategoryRepository notesGroupCategoryRepository;
     private final AuthUtil authUtil;
     private final WorkstationService workstationService;
+    private final NoteCategoryValueRepository noteCategoryValueRepository;
 
-    public NotesGroupService(NotesGroupRepository notesGroupRepository, WorkstationRepository workstationRepository, NoteRepository noteRepository, NotesGroupCategoryRepository notesGroupCategoryRepository, AuthUtil authUtil, WorkstationService workstationService) {
+    public NotesGroupService(NotesGroupRepository notesGroupRepository, WorkstationRepository workstationRepository, NoteRepository noteRepository, NotesGroupCategoryRepository notesGroupCategoryRepository, AuthUtil authUtil, WorkstationService workstationService, NoteCategoryValueRepository noteCategoryValueRepository) {
         this.notesGroupRepository = notesGroupRepository;
         this.workstationRepository = workstationRepository;
         this.noteRepository = noteRepository;
         this.notesGroupCategoryRepository = notesGroupCategoryRepository;
         this.authUtil = authUtil;
         this.workstationService = workstationService;
+        this.noteCategoryValueRepository = noteCategoryValueRepository;
     }
 
     public void createNotesGroup(CreateNotesGroupDTO notesGroupDTO) {
@@ -74,12 +78,25 @@ public class NotesGroupService {
         return NotesGroupMapper.INSTANCE.notesGroupToAllNotesGroupDTO(notesGroups);
     }
 
+    @Transactional
     public NotesGroupDTO getNotesGroupById(Long notesGroupId) {
         NotesGroup notesGroup = notesGroupRepository.findById(notesGroupId).orElseThrow(() -> new NotFoundException("NotesGroup not found"));
         NotesGroupDTO notesGroupDTO = NotesGroupMapper.INSTANCE.notesGroupToNotesGroupDTO(notesGroup);
 
-        List<Note> notes = noteRepository.findAllByNotesGroup_Id(notesGroupId);
-        List<NoteDTO> noteDTOS = NoteMapper.INSTANCE.noteListToDTO(notes);
+        List<Note> notes = noteRepository.findSummaryByNotesGroup_Id(notesGroupId);
+        List<NoteSummaryDTO> noteDTOS = new ArrayList<>();
+
+        for (Note note : notes) {
+            NoteSummaryDTO noteSummaryDTO = new NoteSummaryDTO();
+            noteSummaryDTO.setId(note.getId());
+            noteSummaryDTO.setTitle(note.getTitle());
+            noteSummaryDTO.setCollaborators(UserMapper.INSTANCE.usersToNoteAuthorDTOS(note.getCollaborators()));
+            noteSummaryDTO.setCreator(UserMapper.INSTANCE.userToNoteAuthorDTO(note.getCreator()));
+            noteSummaryDTO.setCategoriesValues(NoteMapper.INSTANCE.noteCategoryValueListToNoteCategoryValueDTOS(note.getCategoriesValues()));
+            noteSummaryDTO.setCreatedAt(note.getCreatedAt());
+
+            noteDTOS.add(noteSummaryDTO);
+        }
 
         notesGroupDTO.setNotes(noteDTOS);
 
@@ -117,5 +134,15 @@ public class NotesGroupService {
             notesGroupCategory.setName(editSingleCategoryDTO.name());
         }
         notesGroupCategoryRepository.save(notesGroupCategory);
+    }
+
+    @Transactional
+    public Set<NoteCategoryValueDTO> getNotesGroupCategoryTags(Long notesGroupId, Long categoryId) {
+        NotesGroupCategory notesGroupCategory = notesGroupCategoryRepository.findById(categoryId).orElseThrow(() -> new NotFoundException("NotesGroupCategory not found"));
+        if(!notesGroupCategory.getGroup().getId().equals(notesGroupId)) {
+            throw new BadRequestException("Categoria não equivale ao grupo de anotações");
+        }
+        Set<NoteCategoryValue> noteCategoryValues = noteCategoryValueRepository.findAllByCategory_Id(categoryId);
+        return NoteMapper.INSTANCE.noteCategoryValueListToNoteCategoryValueDTOS(noteCategoryValues);
     }
 }

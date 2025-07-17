@@ -1,15 +1,11 @@
 package com.nottie.dto.request.note;
 
-import java.util.List;
-
 public class NewNoteDTO {
     private String title;
-    private List<NoteCategoryValue> categoriesValues;
     private Long notesGroupId;
 
-    public NewNoteDTO(String title, List<NoteCategoryValue> categoriesValues, Long notesGroupId) {
+    public NewNoteDTO(String title, Long notesGroupId) {
         this.title = title;
-        this.categoriesValues = categoriesValues;
         this.notesGroupId = notesGroupId;
     }
 
@@ -19,14 +15,6 @@ public class NewNoteDTO {
 
     public void setTitle(String title) {
         this.title = title;
-    }
-
-    public List<NoteCategoryValue> getCategoriesValues() {
-        return categoriesValues;
-    }
-
-    public void setCategoriesValues(List<NoteCategoryValue> categoriesValues) {
-        this.categoriesValues = categoriesValues;
     }
 
     public Long getNotesGroupId() {

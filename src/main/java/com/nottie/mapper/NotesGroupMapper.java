@@ -1,8 +1,10 @@
 package com.nottie.mapper;
 
 import com.nottie.dto.response.notesgroup.GetAllNotesGroupDTO;
+import com.nottie.dto.response.notesgroup.NotesGroupCategoryDTO;
 import com.nottie.dto.response.notesgroup.NotesGroupDTO;
 import com.nottie.model.NotesGroup;
+import com.nottie.model.NotesGroupCategory;
 import org.mapstruct.Mapper;
 import org.mapstruct.Mapping;
 import org.mapstruct.factory.Mappers;
@@ -18,4 +20,5 @@ public interface NotesGroupMapper {
     @Mapping(target = "notes", ignore = true)
     NotesGroupDTO notesGroupToNotesGroupDTO(NotesGroup notesGroup);
 
+    List<NotesGroupCategoryDTO> notesGroupToNotesGroupCategoryDTO(List<NotesGroupCategory> notesGroupCategories);
 }

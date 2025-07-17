@@ -1,8 +1,6 @@
 package com.nottie.dto.response.notesgroup;
 
 
-import com.nottie.dto.response.note.NoteDTO;
-
 import java.util.List;
 
 public class NotesGroupDTO {
@@ -10,9 +8,9 @@ public class NotesGroupDTO {
     private String title;
     private List<NotesGroupCategoryDTO> categories;
 
-    private List<NoteDTO> notes;
+    private List<NoteSummaryDTO> notes;
 
-    public NotesGroupDTO(Long id, String title, List<NotesGroupCategoryDTO> categories, List<NoteDTO> notes) {
+    public NotesGroupDTO(Long id, String title, List<NotesGroupCategoryDTO> categories, List<NoteSummaryDTO> notes) {
         this.id = id;
         this.title = title;
         this.categories = categories;
@@ -46,11 +44,11 @@ public class NotesGroupDTO {
         this.categories = categories;
     }
 
-    public List<NoteDTO> getNotes() {
+    public List<NoteSummaryDTO> getNotes() {
         return notes;
     }
 
-    public void setNotes(List<NoteDTO> notes) {
+    public void setNotes(List<NoteSummaryDTO> notes) {
         this.notes = notes;
     }
 }

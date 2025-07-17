@@ -7,8 +7,8 @@ import org.springframework.data.annotation.LastModifiedDate;
 import org.springframework.data.jpa.domain.support.AuditingEntityListener;
 
 import java.time.Instant;
-import java.util.Collections;
-import java.util.List;
+import java.util.HashSet;
+import java.util.Set;
 
 @Entity
 @Table(name = "note")
@@ -18,8 +18,9 @@ public class Note {
     @GeneratedValue(strategy = GenerationType.IDENTITY)
     private Long id;
     private String title;
-    @Column(columnDefinition = "TEXT")
-    private String content;
+    @Lob
+    @Basic(fetch = FetchType.LAZY)
+    private byte[] content;
 
     @CreatedBy
     @ManyToOne(fetch = FetchType.EAGER)
@@ -36,7 +37,7 @@ public class Note {
             joinColumns = {@JoinColumn(name = "note_id")},
             inverseJoinColumns = {@JoinColumn(name = "user_id")}
     )
-    private List<User> collaborators = Collections.singletonList(creator);
+    private Set<User> collaborators = new HashSet<>();
 
     @LastModifiedDate
     @Column(name = "updated_at")
@@ -44,7 +45,7 @@ public class Note {
     private Instant updatedAt;
 
     @OneToMany(mappedBy = "note")
-    private List<NoteCategoryValue> categoriesValues;
+    private Set<NoteCategoryValue> categoriesValues;
 
     @ManyToOne
     @JoinColumn(name = "notesGroup_id")
@@ -68,11 +69,11 @@ public class Note {
         this.title = title;
     }
 
-    public String getContent() {
+    public byte[] getContent() {
         return content;
     }
 
-    public void setContent(String content) {
+    public void setContent(byte[] content) {
         this.content = content;
     }
 
@@ -92,13 +93,6 @@ public class Note {
         this.createdAt = createdAt;
     }
 
-    public List<User> getCollaborators() {
-        return collaborators;
-    }
-
-    public void setCollaborators(List<User> collaborators) {
-        this.collaborators = collaborators;
-    }
 
     public Instant getUpdatedAt() {
         return updatedAt;
@@ -108,12 +102,20 @@ public class Note {
         this.updatedAt = updatedAt;
     }
 
-    public List<NoteCategoryValue> getCategoriesValues() {
+    public void setCollaborators(Set<User> collaborators) {
+        this.collaborators = collaborators;
+    }
+
+    public Set<NoteCategoryValue> getCategoriesValues() {
         return categoriesValues;
     }
 
-    public void setCategoriesValues(List<NoteCategoryValue> categoriesValues) {
+    public void setCategoriesValues(Set<NoteCategoryValue> categoriesValues) {
         this.categoriesValues = categoriesValues;
+    }
+
+    public Set<User> getCollaborators() {
+        return collaborators;
     }
 
     public NotesGroup getNotesGroup() {

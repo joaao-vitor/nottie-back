@@ -3,6 +3,7 @@ package com.nottie.controller;
 import com.nottie.dto.request.notesgroup.CreateNotesGroupCategoryDTO;
 import com.nottie.dto.request.notesgroup.CreateNotesGroupDTO;
 import com.nottie.dto.request.notesgroup.EditSingleCategoryDTO;
+import com.nottie.dto.response.note.NoteCategoryValueDTO;
 import com.nottie.service.NotesGroupService;
 import com.nottie.service.WorkstationService;
 import com.nottie.util.ResponseUtil;
@@ -10,6 +11,8 @@ import org.springframework.http.HttpStatus;
 import org.springframework.http.ResponseEntity;
 import org.springframework.security.access.prepost.PreAuthorize;
 import org.springframework.web.bind.annotation.*;
+
+import java.util.Set;
 
 @RestController
 @RequestMapping(value = "/notesgroup")
@@ -56,4 +59,11 @@ public class NotesGroupController {
         notesGroupService.editSingleCategory(notesGroupId, categoryId, editSingleCategoryDTO);
         return ResponseUtil.buildSuccessResponse("Notes Groups category updated successfully", HttpStatus.OK);
     }
+
+    @GetMapping("/{notesGroupId}/category/{categoryId}/tag")
+    public ResponseEntity<?> getNotesGroupCategoryTags(@PathVariable Long notesGroupId, @PathVariable Long categoryId){
+        Set<NoteCategoryValueDTO> categories = notesGroupService.getNotesGroupCategoryTags(notesGroupId, categoryId);
+        return ResponseUtil.buildSuccessResponse(categories, "Notes Groups tags fetched successfully", HttpStatus.OK);
+    }
+
 }

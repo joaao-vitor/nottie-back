@@ -1,6 +1,7 @@
 package com.nottie.mapper;
 
 import com.nottie.dto.request.auth.CreateUserDTO;
+import com.nottie.dto.response.note.NoteAuthorDTO;
 import com.nottie.dto.response.user.AuthenticatedUserDTO;
 import com.nottie.dto.response.user.SearchUserDTO;
 import com.nottie.dto.response.user.SummaryDTO;
@@ -15,6 +16,7 @@ import org.mapstruct.Mapping;
 import org.mapstruct.factory.Mappers;
 
 import java.util.List;
+import java.util.Set;
 
 @Mapper
 public interface UserMapper {
@@ -45,4 +47,7 @@ public interface UserMapper {
     WorkstationMemberDTO userToWorkstationMemberDTO(User creator);
 
     List<SearchUserDTO> usersToSearchUserDTOS(List<User> users);
+
+    Set<NoteAuthorDTO> usersToNoteAuthorDTOS(Set<User> users);
+    NoteAuthorDTO userToNoteAuthorDTO(User user);
 }
