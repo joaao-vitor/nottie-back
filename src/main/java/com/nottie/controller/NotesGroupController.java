@@ -5,7 +5,6 @@ import com.nottie.dto.request.notesgroup.CreateNotesGroupDTO;
 import com.nottie.dto.request.notesgroup.EditSingleCategoryDTO;
 import com.nottie.dto.response.note.NoteCategoryValueDTO;
 import com.nottie.service.NotesGroupService;
-import com.nottie.service.WorkstationService;
 import com.nottie.util.ResponseUtil;
 import org.springframework.http.HttpStatus;
 import org.springframework.http.ResponseEntity;
