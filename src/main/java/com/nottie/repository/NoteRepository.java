@@ -12,4 +12,8 @@ public interface NoteRepository extends JpaRepository<Note, Long> {
     @EntityGraph(attributePaths = {"creator", "collaborators", "categoriesValues"})
     @Query("SELECT n FROM Note n WHERE n.notesGroup.id = :notesGroupId")
     List<Note> findSummaryByNotesGroup_Id(@Param("notesGroupId") Long notesGroupId);
+
+    List<Note> findTop5ByTitleContainingIgnoreCaseAndNotesGroup_Workstation_Id(String title, Long notesGroupWorkstationId);
+
+    List<Note> findTop5ByCreator_IdAndTitleContainingIgnoreCase(Long creatorId, String title);
 }

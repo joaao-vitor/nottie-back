@@ -18,8 +18,9 @@ public class Note {
     @GeneratedValue(strategy = GenerationType.IDENTITY)
     private Long id;
     private String title;
-    @Lob
+
     @Basic(fetch = FetchType.LAZY)
+    @Column(columnDefinition = "BYTEA")
     private byte[] content;
 
     @CreatedBy
@@ -50,6 +51,9 @@ public class Note {
     @ManyToOne
     @JoinColumn(name = "notesGroup_id")
     private NotesGroup notesGroup;
+
+    private boolean published = false;
+
     public Note() {
     }
 
@@ -93,6 +97,13 @@ public class Note {
         this.createdAt = createdAt;
     }
 
+    public boolean isPublished() {
+        return published;
+    }
+
+    public void setPublished(boolean published) {
+        this.published = published;
+    }
 
     public Instant getUpdatedAt() {
         return updatedAt;

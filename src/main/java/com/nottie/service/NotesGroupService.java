@@ -47,13 +47,14 @@ public class NotesGroupService {
     public void createNotesGroup(CreateNotesGroupDTO notesGroupDTO) {
         NotesGroup notesGroup = new NotesGroup();
         notesGroup.setTitle(notesGroupDTO.title());
-
+        System.out.println(notesGroupDTO);
         Workstation workstation;
 
-        if(notesGroupDTO.workstationId() != null) {
+        if (notesGroupDTO.workstationId() != null) {
             workstation = workstationRepository.findById(notesGroupDTO.workstationId()).orElseThrow(() -> new NotFoundException("Workstation not found"));
 
-            if(!workstationService.isLeader(workstation.getId())) throw new UnauthorizedException("Você não é lider dessa estação");
+            if (!workstationService.isLeader(workstation.getId()))
+                throw new UnauthorizedException("Você não é lider dessa estação");
 
             notesGroup.setWorkstation(workstation);
         } else {
@@ -106,11 +107,13 @@ public class NotesGroupService {
     public void newNotesGroupCategory(Long notesGroupId, CreateNotesGroupCategoryDTO notesGroupCategoryDTO) {
         NotesGroup notesGroup = notesGroupRepository.findById(notesGroupId).orElseThrow(() -> new NotFoundException("NotesGroup not found"));
 
-        if(notesGroup.getWorkstation() != null) {
-            if(!workstationService.isLeader(notesGroup.getWorkstation().getId())) throw new UnauthorizedException("Você não é lider dessa estação");
+        if (notesGroup.getWorkstation() != null) {
+            if (!workstationService.isLeader(notesGroup.getWorkstation().getId()))
+                throw new UnauthorizedException("Você não é lider dessa estação");
         } else {
             User user = authUtil.getAuthenticatedUser();
-            if(!notesGroup.getUser().getId().equals(user.getId())) throw new UnauthorizedException("Você não é o dono desse grupo de anotações");
+            if (!notesGroup.getUser().getId().equals(user.getId()))
+                throw new UnauthorizedException("Você não é o dono desse grupo de anotações");
         }
 
         NotesGroupCategory notesGroupCategory = new NotesGroupCategory();
@@ -125,12 +128,13 @@ public class NotesGroupService {
 
     public void editSingleCategory(Long notesGroupId, Long categoryId, EditSingleCategoryDTO editSingleCategoryDTO) {
         NotesGroupCategory notesGroupCategory = notesGroupCategoryRepository.findById(categoryId).orElseThrow(() -> new NotFoundException("NotesGroupCategory not found"));
-        if(!notesGroupCategory.getGroup().getId().equals(notesGroupId)) throw new BadRequestException("Essa categoria não pertence a esse grupo");
+        if (!notesGroupCategory.getGroup().getId().equals(notesGroupId))
+            throw new BadRequestException("Essa categoria não pertence a esse grupo");
 
-        if(editSingleCategoryDTO.type() != null) {
+        if (editSingleCategoryDTO.type() != null) {
             notesGroupCategory.setType(editSingleCategoryDTO.type());
         }
-        if(editSingleCategoryDTO.name() != null) {
+        if (editSingleCategoryDTO.name() != null) {
             notesGroupCategory.setName(editSingleCategoryDTO.name());
         }
         notesGroupCategoryRepository.save(notesGroupCategory);
@@ -139,10 +143,28 @@ public class NotesGroupService {
     @Transactional
     public Set<NoteCategoryValueDTO> getNotesGroupCategoryTags(Long notesGroupId, Long categoryId) {
         NotesGroupCategory notesGroupCategory = notesGroupCategoryRepository.findById(categoryId).orElseThrow(() -> new NotFoundException("NotesGroupCategory not found"));
-        if(!notesGroupCategory.getGroup().getId().equals(notesGroupId)) {
+        if (!notesGroupCategory.getGroup().getId().equals(notesGroupId)) {
             throw new BadRequestException("Categoria não equivale ao grupo de anotações");
         }
         Set<NoteCategoryValue> noteCategoryValues = noteCategoryValueRepository.findAllByCategory_Id(categoryId);
         return NoteMapper.INSTANCE.noteCategoryValueListToNoteCategoryValueDTOS(noteCategoryValues);
+    }
+
+    public boolean verifyMember(Long notesGroupId) {
+        NotesGroup notesGroup = notesGroupRepository.findById(notesGroupId).orElseThrow(() -> new NotFoundException("NotesGroup not found"));
+        User user = authUtil.getAuthenticatedUser();
+        if (notesGroup.getWorkstation() != null)
+            return workstationService.isMember(notesGroup.getWorkstation().getId());
+        else
+            return notesGroup.getUser().getId().equals(user.getId());
+    }
+
+    public boolean verifyLeader(Long notesGroupId) {
+        NotesGroup notesGroup = notesGroupRepository.findById(notesGroupId).orElseThrow(() -> new NotFoundException("NotesGroup not found"));
+        User user = authUtil.getAuthenticatedUser();
+        if (notesGroup.getWorkstation() != null)
+            return workstationService.isLeader(notesGroup.getWorkstation().getId());
+        else
+            return notesGroup.getUser().getId().equals(user.getId());
     }
 }

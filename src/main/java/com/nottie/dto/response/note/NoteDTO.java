@@ -10,23 +10,30 @@ public class NoteDTO {
     private String title;
     private byte[] content;
     private NoteAuthorDTO creator;
+    private NoteAuthorDTO workstation;
     private List<NoteAuthorDTO> collaborators;
     private Instant createdAt;
     private List<NoteCategoryValueDTO> categoriesValues;
     private List<NotesGroupCategoryDTO> categories;
+    private boolean published;
 
     public NoteDTO() {
     }
 
-    public NoteDTO(Long id, String title, byte[] content, NoteAuthorDTO creator, List<NoteAuthorDTO> collaborators, Instant createdAt, List<NoteCategoryValueDTO> categoriesValues, List<NotesGroupCategoryDTO> categories) {
-        this.id = id;
-        this.title = title;
-        this.content = content;
-        this.creator = creator;
-        this.collaborators = collaborators;
-        this.createdAt = createdAt;
-        this.categoriesValues = categoriesValues;
-        this.categories = categories;
+    public boolean isPublished() {
+        return published;
+    }
+
+    public void setPublished(boolean published) {
+        this.published = published;
+    }
+
+    public NoteAuthorDTO getWorkstation() {
+        return workstation;
+    }
+
+    public void setWorkstation(NoteAuthorDTO workstation) {
+        this.workstation = workstation;
     }
 
     public List<NotesGroupCategoryDTO> getCategories() {

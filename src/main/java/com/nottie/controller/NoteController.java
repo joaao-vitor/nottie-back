@@ -3,10 +3,10 @@ package com.nottie.controller;
 import com.nottie.dto.request.note.*;
 import com.nottie.dto.response.note.NoteCategoryValueDTO;
 import com.nottie.dto.response.note.NoteDTO;
+import com.nottie.dto.response.note.SearchNoteDTO;
 import com.nottie.dto.response.user.AuthenticatedUserDTO;
 import com.nottie.service.NoteService;
 import com.nottie.service.UserService;
-import com.nottie.util.AuthUtil;
 import com.nottie.util.ResponseUtil;
 import org.springframework.http.HttpStatus;
 import org.springframework.http.MediaType;
@@ -15,6 +15,7 @@ import org.springframework.security.access.prepost.PreAuthorize;
 import org.springframework.web.bind.annotation.*;
 
 import java.util.Arrays;
+import java.util.List;
 
 @RestController
 @RequestMapping(value = "/note")
@@ -27,6 +28,18 @@ public class NoteController {
         this.userService = userService;
     }
 
+    @GetMapping("/search/workstation/{workstationId}")
+    public ResponseEntity<?> searchNoteByWorkstation(@PathVariable("workstationId") Long workstationId, @RequestParam(required = true) String title) {
+        List<SearchNoteDTO> searchNoteDTOS = noteService.searchNoteByWorkstation(title, workstationId);
+        return ResponseUtil.buildSuccessResponse(searchNoteDTOS, "Notes found", HttpStatus.OK);
+    }
+
+    @GetMapping("/search/user")
+    public ResponseEntity<?> searchNoteByUser(@RequestParam(required = true) String title) {
+        List<SearchNoteDTO> searchNoteDTOS = noteService.searchNoteByUser(title);
+        return ResponseUtil.buildSuccessResponse(searchNoteDTOS, "Notes found", HttpStatus.OK);
+    }
+
     @GetMapping("/{noteId}")
     @PreAuthorize("@noteService.verifyAccess(#noteId)")
     public ResponseEntity<?> getSingleNote(@PathVariable Long noteId){
@@ -36,8 +49,8 @@ public class NoteController {
 
     @PostMapping()
     public ResponseEntity<?> createNote(@RequestBody NewNoteDTO newNoteDTO) {
-        noteService.createNote(newNoteDTO);
-        return ResponseUtil.buildSuccessResponse("Note created successfully", HttpStatus.CREATED);
+        NoteDTO noteDTO = noteService.createNote(newNoteDTO);
+        return ResponseUtil.buildSuccessResponse(noteDTO, "Note created successfully", HttpStatus.CREATED);
     }
 
     @PutMapping("/{noteId}/category/{categoryValueId}")
@@ -50,6 +63,8 @@ public class NoteController {
     )
     @PreAuthorize("@noteService.verifyAccess(#noteId)")
     public ResponseEntity<?> editContent(@PathVariable Long noteId, @RequestBody byte[] content) {
+
+        System.out.println("Editando conteudo da nota + " + noteId);
         System.out.println(Arrays.toString(content));
         noteService.editContent(noteId, content);
         return ResponseUtil.buildSuccessResponse("Content updated successfully", HttpStatus.OK);

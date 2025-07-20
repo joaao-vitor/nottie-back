@@ -19,11 +19,9 @@ import java.util.Set;
 public class NotesGroupController {
 
     private final NotesGroupService notesGroupService;
-    private final WorkstationService workstationService;
 
-    public NotesGroupController(NotesGroupService notesGroupService, WorkstationService workstationService) {
+    public NotesGroupController(NotesGroupService notesGroupService) {
         this.notesGroupService = notesGroupService;
-        this.workstationService = workstationService;
     }
 
     @PostMapping()
@@ -43,23 +41,27 @@ public class NotesGroupController {
         return ResponseUtil.buildSuccessResponse(notesGroupService.getAllNotesGroupByUser(), "Notes Groups fetched successfully", HttpStatus.OK);
     }
 
+    @PreAuthorize("@notesGroupService.verifyMember(#notesGroupId)")
     @GetMapping("/{notesGroupId}")
     public ResponseEntity<?> getNotesGroupById(@PathVariable Long notesGroupId) {
         return ResponseUtil.buildSuccessResponse(notesGroupService.getNotesGroupById(notesGroupId), "Notes Groups fetched successfully", HttpStatus.OK);
     }
 
+    @PreAuthorize("@notesGroupService.verifyLeader(#notesGroupId)")
     @PostMapping("/{notesGroupId}/category")
     public ResponseEntity<?> newNotesGroupCategory(@PathVariable Long notesGroupId, @RequestBody CreateNotesGroupCategoryDTO notesGroupCategoryDTO) {
         notesGroupService.newNotesGroupCategory(notesGroupId, notesGroupCategoryDTO);
         return ResponseUtil.buildSuccessResponse( "Notes Groups category created successfully", HttpStatus.CREATED);
     }
 
+    @PreAuthorize("@notesGroupService.verifyLeader(#notesGroupId)")
     @PutMapping("/{notesGroupId}/category/{categoryId}")
     public ResponseEntity<?> editSingleCategory(@PathVariable Long notesGroupId, @PathVariable Long categoryId, @RequestBody EditSingleCategoryDTO editSingleCategoryDTO){
         notesGroupService.editSingleCategory(notesGroupId, categoryId, editSingleCategoryDTO);
         return ResponseUtil.buildSuccessResponse("Notes Groups category updated successfully", HttpStatus.OK);
     }
 
+    @PreAuthorize("@notesGroupService.verifyMember(#notesGroupId)")
     @GetMapping("/{notesGroupId}/category/{categoryId}/tag")
     public ResponseEntity<?> getNotesGroupCategoryTags(@PathVariable Long notesGroupId, @PathVariable Long categoryId){
         Set<NoteCategoryValueDTO> categories = notesGroupService.getNotesGroupCategoryTags(notesGroupId, categoryId);
