@@ -14,9 +14,6 @@ public interface PostMapper {
 
     @Mapping(target = "creator", ignore = true)
     @Mapping(target = "workstation", ignore = true)
-
-    @Mapping(target = "creator", ignore = true)
-    @Mapping(target = "workstation", ignore = true)
     PostCommentResponseDTO commentToPostCommentResponseDTO(PostComment postComment);
 
     TimelineItemDTO postToTimelineItemDTO(Post post);
