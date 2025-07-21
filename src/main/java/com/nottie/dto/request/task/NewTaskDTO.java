@@ -12,7 +12,7 @@ public record NewTaskDTO(
         Date endDate,
         StatusType status,
         Set<Long> membersId,
-        Set<TaskCategoryValueDTO> categoriesValues,
+        Set<NewTaskCategoryValueDTO> categoriesValues,
         Long tasksGroupId
 ) {
 }

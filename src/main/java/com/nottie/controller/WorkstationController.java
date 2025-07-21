@@ -3,6 +3,7 @@ package com.nottie.controller;
 import com.nottie.dto.request.workstation.CreateWorkstationDTO;
 import com.nottie.dto.request.workstation.EditWorkstationDTO;
 import com.nottie.dto.request.workstation.GetLeadersDTO;
+import com.nottie.dto.response.user.SearchUserDTO;
 import com.nottie.dto.response.user.SummaryDTO;
 import com.nottie.dto.response.workstation.*;
 import com.nottie.service.WorkstationService;
@@ -14,6 +15,8 @@ import org.springframework.security.access.prepost.PreAuthorize;
 import org.springframework.web.bind.annotation.*;
 import org.springframework.web.multipart.MultipartFile;
 
+import java.util.Set;
+
 @RestController
 @RequestMapping("/workstation")
 public class WorkstationController {
@@ -22,6 +25,12 @@ public class WorkstationController {
 
     public WorkstationController(WorkstationService workstationService) {
         this.workstationService = workstationService;
+    }
+
+    @GetMapping("/{workstationId}/search/members")
+    public ResponseEntity<?> searchMembers(@PathVariable("workstationId") Long workstationId, @RequestParam String name) {
+        Set<SearchUserDTO> members = workstationService.searchMembers(workstationId, name);
+        return ResponseUtil.buildSuccessResponse(members, "Members searched successfully", HttpStatus.OK);
     }
 
     @GetMapping("/summary/{username}")

@@ -16,8 +16,10 @@ import com.nottie.repository.*;
 import com.nottie.util.AuthUtil;
 import org.springframework.stereotype.Service;
 
+import java.util.HashSet;
 import java.util.List;
 import java.util.Set;
+import java.util.stream.Collectors;
 
 @Service
 public class TasksGroupService {
@@ -128,12 +130,25 @@ public class TasksGroupService {
         tasksGroupCategoryRepository.save(tasksGroupCategory);
     }
 
-    public Set<TaskCategoryValueDTO> getTasksGroupCategoryTags(Long tasksGroupId, Long categoryId) {
-        TasksGroupCategory tasksGroupCategory = tasksGroupCategoryRepository.findById(categoryId).orElseThrow(() -> new NotFoundException("TasksGroupCategory not found"));
+    public List<TaskCategoryValueDTO> getTasksGroupCategoryTags(Long tasksGroupId, Long categoryId) {
+        TasksGroupCategory tasksGroupCategory = tasksGroupCategoryRepository.findById(categoryId)
+                .orElseThrow(() -> new NotFoundException("TasksGroupCategory not found"));
+
         if (!tasksGroupCategory.getGroup().getId().equals(tasksGroupId)) {
             throw new BadRequestException("Categoria não equivale ao grupo de anotações");
         }
-        Set<NoteCategoryValue> taskCategoryValues = taskCategoryValueRepository.findAllByCategory_Id(categoryId);
-        return TaskMapper.INSTANCE.taskCategoryValueListToTaskCategoryValueDTOS(taskCategoryValues);
+
+        List<TaskCategoryValue> taskCategoryValues = taskCategoryValueRepository.findAllByCategory_Id(categoryId);
+
+        Set<String> seenKeys = new HashSet<>();
+
+        List<TaskCategoryValue> distinctValues = taskCategoryValues.stream()
+                .filter(value -> {
+                    String key = value.getTextValue() + "::" + value.getHexColor();
+                    return seenKeys.add(key);
+                })
+                .collect(Collectors.toList());
+
+        return TaskMapper.INSTANCE.taskCategoryValueListToTaskCategoryValueDTOS(distinctValues);
     }
 }

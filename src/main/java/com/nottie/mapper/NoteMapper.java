@@ -22,6 +22,7 @@ public interface NoteMapper {
 
     NoteCategoryValueDTO noteCategoryValueToNoteCategoryValueDTO(NoteCategoryValue noteCategoryValue);
 
+    List<NoteCategoryValueDTO> noteCategoryValueListToNoteCategoryValueDTOS(List<NoteCategoryValue> noteCategoryValue);
     Set<NoteCategoryValueDTO> noteCategoryValueListToNoteCategoryValueDTOS(Set<NoteCategoryValue> noteCategoryValue);
 
     NoteTimelinePostDTO noteToNoteTimelinePostDTO(Note note);

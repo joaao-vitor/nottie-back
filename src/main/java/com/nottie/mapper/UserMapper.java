@@ -47,6 +47,7 @@ public interface UserMapper {
     WorkstationMemberDTO userToWorkstationMemberDTO(User creator);
 
     List<SearchUserDTO> usersToSearchUserDTOS(List<User> users);
+    Set<SearchUserDTO> usersToSearchUserDTOS(Set<User> users);
 
     Set<NoteAuthorDTO> usersToNoteAuthorDTOS(Set<User> users);
     NoteAuthorDTO userToNoteAuthorDTO(User user);

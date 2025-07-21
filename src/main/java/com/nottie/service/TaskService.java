@@ -12,10 +12,7 @@ import com.nottie.exception.UnauthorizedException;
 import com.nottie.mapper.TaskMapper;
 import com.nottie.mapper.TasksGroupMapper;
 import com.nottie.model.*;
-import com.nottie.repository.TaskCategoryValueRepository;
-import com.nottie.repository.TaskRepository;
-import com.nottie.repository.TasksGroupCategoryRepository;
-import com.nottie.repository.TasksGroupRepository;
+import com.nottie.repository.*;
 import com.nottie.util.AuthUtil;
 import org.springframework.stereotype.Service;
 
@@ -29,14 +26,16 @@ public class TaskService {
     private final TaskCategoryValueRepository taskCategoryValueRepository;
     private final WorkstationService workstationService;
     private final AuthUtil authUtil;
+    private final UserRepository userRepository;
 
-    public TaskService(TaskRepository taskRepository, TasksGroupCategoryRepository tasksGroupCategoryRepository, TasksGroupRepository tasksGroupRepository, TaskCategoryValueRepository taskCategoryValueRepository, WorkstationService workstationService, AuthUtil authUtil) {
+    public TaskService(TaskRepository taskRepository, TasksGroupCategoryRepository tasksGroupCategoryRepository, TasksGroupRepository tasksGroupRepository, TaskCategoryValueRepository taskCategoryValueRepository, WorkstationService workstationService, AuthUtil authUtil, UserRepository userRepository) {
         this.taskRepository = taskRepository;
         this.tasksGroupCategoryRepository = tasksGroupCategoryRepository;
         this.tasksGroupRepository = tasksGroupRepository;
         this.taskCategoryValueRepository = taskCategoryValueRepository;
         this.workstationService = workstationService;
         this.authUtil = authUtil;
+        this.userRepository = userRepository;
     }
 
     public TaskDTO getSingleTask(Long taskId) {
@@ -52,35 +51,44 @@ public class TaskService {
         Task task = new Task();
         task.setName(newTaskDTO.name());
         task.setDescription(newTaskDTO.description());
-        if (task.getStartDate() != null) {
+
+        if (newTaskDTO.startDate() != null) {
             task.setStartDate(newTaskDTO.startDate());
         } else {
             task.setStartDate(new Date());
         }
-        if (task.getEndDate() != null) {
+
+        if (newTaskDTO.endDate() != null) {
             task.setEndDate(newTaskDTO.endDate());
         } else {
             task.setEndDate(new Date());
         }
-        task.setStatus(StatusType.NOT_STARTED);
+
+        task.setStatus(newTaskDTO.status());
 
         if (newTaskDTO.tasksGroupId() == null) throw new BadRequestException("TasksGroupId cannot be null");
 
         task.setTasksGroup(tasksGroupRepository.findById(newTaskDTO.tasksGroupId()).orElseThrow(() -> new BadRequestException("TaskGroup not found")));
 
+        newTaskDTO.membersId().forEach(memberId -> {
+            User user = userRepository.findById(memberId).orElseThrow(() -> new NotFoundException("User not found"));
+            task.getMembers().add(user);
+        });
+
         taskRepository.save(task);
         Set<TaskCategoryValue> values = new HashSet<>();
         newTaskDTO.categoriesValues().forEach(value -> {
             TaskCategoryValue taskCategoryValue = new TaskCategoryValue();
-            TasksGroupCategory category = tasksGroupCategoryRepository.findById(value.getCategory().id()).orElseThrow(() -> new BadRequestException("Category not found"));
+            TasksGroupCategory category = tasksGroupCategoryRepository.findById(value.categoryId()).orElseThrow(() -> new BadRequestException("Category not found"));
             taskCategoryValue.setCategory(category);
-            taskCategoryValue.setCheckboxValue(value.getCheckboxValue());
-            taskCategoryValue.setTextValue(value.getTextValue());
-            taskCategoryValue.setHexColor(value.getHexColor());
+            taskCategoryValue.setCheckboxValue(value.checkboxValue());
+            taskCategoryValue.setTextValue(value.textValue());
+            taskCategoryValue.setHexColor(value.hexColor());
             taskCategoryValue.setTask(task);
             taskCategoryValueRepository.save(taskCategoryValue);
             values.add(taskCategoryValue);
         });
+
 
         task.setCategoriesValues(values);
 

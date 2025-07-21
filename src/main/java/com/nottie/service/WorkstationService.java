@@ -1,5 +1,6 @@
 package com.nottie.service;
 
+import com.nottie.dto.response.user.SearchUserDTO;
 import com.nottie.dto.response.workstation.WorkstationAuthDTO;
 import com.nottie.dto.response.user.SummaryDTO;
 import com.nottie.dto.request.workstation.CreateWorkstationDTO;
@@ -25,6 +26,8 @@ import org.springframework.web.multipart.MultipartFile;
 
 import java.util.List;
 import java.util.Objects;
+import java.util.Set;
+import java.util.stream.Collectors;
 
 
 @Service
@@ -33,6 +36,18 @@ public class WorkstationService {
     private final AuthUtil authUtil;
     private final UserRepository userRepository;
     private final CloudinaryService cloudinaryService;
+
+    public Set<SearchUserDTO> searchMembers(Long workstationId, String name) {
+        Workstation workstation = workstationRepository.findById(workstationId).orElseThrow(() -> new NotFoundException("Workstation not found"));
+
+        Set<User> members = workstation.getMembers().stream().filter((member) -> {
+            if(member.getName().toLowerCase().contains(name.toLowerCase())){
+                return true;
+            } else return member.getUsername().toLowerCase().contains(name.toLowerCase());
+        }).collect(Collectors.toSet());
+
+        return UserMapper.INSTANCE.usersToSearchUserDTOS(members);
+    }
 
     public enum FollowType {USER, WORKSTATION}
 

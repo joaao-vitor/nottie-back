@@ -11,7 +11,7 @@ import org.springframework.http.ResponseEntity;
 import org.springframework.security.access.prepost.PreAuthorize;
 import org.springframework.web.bind.annotation.*;
 
-import java.util.Set;
+import java.util.List;
 
 @RestController
 @RequestMapping(value = "/tasksgroup")
@@ -63,7 +63,7 @@ public class TasksGroupController {
     @PreAuthorize("@tasksGroupService.verifyMember(#tasksGroupId)")
     @GetMapping("/{tasksGroupId}/category/{categoryId}/tag")
     public ResponseEntity<?> getNotesGroupCategoryTags(@PathVariable Long tasksGroupId, @PathVariable Long categoryId) {
-        Set<TaskCategoryValueDTO> categories = tasksGroupService.getTasksGroupCategoryTags(tasksGroupId, categoryId);
+        List<TaskCategoryValueDTO> categories = tasksGroupService.getTasksGroupCategoryTags(tasksGroupId, categoryId);
         return ResponseUtil.buildSuccessResponse(categories, "Notes Groups tags fetched successfully", HttpStatus.OK);
     }
 }

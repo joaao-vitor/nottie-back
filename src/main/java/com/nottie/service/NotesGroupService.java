@@ -20,8 +20,10 @@ import jakarta.transaction.Transactional;
 import org.springframework.stereotype.Service;
 
 import java.util.ArrayList;
+import java.util.HashSet;
 import java.util.List;
 import java.util.Set;
+import java.util.stream.Collectors;
 
 @Service
 public class NotesGroupService {
@@ -139,15 +141,26 @@ public class NotesGroupService {
         }
         notesGroupCategoryRepository.save(notesGroupCategory);
     }
-
     @Transactional
-    public Set<NoteCategoryValueDTO> getNotesGroupCategoryTags(Long notesGroupId, Long categoryId) {
+    public List<NoteCategoryValueDTO> getNotesGroupCategoryTags(Long notesGroupId, Long categoryId) {
         NotesGroupCategory notesGroupCategory = notesGroupCategoryRepository.findById(categoryId).orElseThrow(() -> new NotFoundException("NotesGroupCategory not found"));
+
         if (!notesGroupCategory.getGroup().getId().equals(notesGroupId)) {
             throw new BadRequestException("Categoria não equivale ao grupo de anotações");
         }
-        Set<NoteCategoryValue> noteCategoryValues = noteCategoryValueRepository.findAllByCategory_Id(categoryId);
-        return NoteMapper.INSTANCE.noteCategoryValueListToNoteCategoryValueDTOS(noteCategoryValues);
+
+        List<NoteCategoryValue> noteCategoryValues = noteCategoryValueRepository.findAllByCategory_Id(categoryId);
+
+        Set<String> seenKeys = new HashSet<>();
+
+        List<NoteCategoryValue> distinctValues = noteCategoryValues.stream()
+                .filter(value -> {
+                    String key = value.getTextValue() + "::" + value.getHexColor();
+                    return seenKeys.add(key);
+                })
+                .collect(Collectors.toList());
+
+        return NoteMapper.INSTANCE.noteCategoryValueListToNoteCategoryValueDTOS(distinctValues);
     }
 
     public boolean verifyMember(Long notesGroupId) {
